@@ -1,0 +1,71 @@
+# Testing dependencies for Exotel vSIP API Tests
+
+# Core dependencies
+requests>=2.28.0
+urllib3>=1.26.0
+
+# Async testing for load tests
+aiohttp>=3.8.0
+aiofiles>=0.8.0
+
+# Data analysis and statistics
+statistics>=1.0.3.5  # For load test analysis
+
+# Logging and monitoring
+structlog>=22.0.0  # Structured logging
+
+# Testing frameworks (optional, for unit tests)
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.8.0
+
+# Development and debugging
+ipython>=8.0.0  # For interactive debugging
+pdb++>=0.10.3   # Enhanced debugger
+
+# JSON processing
+jq>=1.3.0       # Command-line JSON processor (system dependency)
+
+# HTTP client debugging
+httpie>=3.0.0   # User-friendly cURL replacement
+
+# Environment management
+python-dotenv>=0.19.0  # For .env file support
+
+# Data validation
+jsonschema>=4.0.0      # JSON schema validation
+pydantic>=1.9.0        # Data validation and parsing
+
+# Retry logic and resilience
+tenacity>=8.0.0        # Retry library
+backoff>=2.0.0         # Exponential backoff
+
+# Concurrent processing
+concurrent-futures>=3.1.1  # Backport for older Python
+
+# Time and date utilities
+python-dateutil>=2.8.0     # Date parsing and manipulation
+
+# System monitoring
+psutil>=5.9.0              # System and process monitoring
+
+# Configuration management
+configparser>=5.0.0        # Configuration file parsing
+PyYAML>=6.0                # YAML support
+
+# Security and encryption
+cryptography>=3.4.0        # For secure operations
+
+# Network utilities
+netaddr>=0.8.0             # IP address manipulation
+dnspython>=2.2.0           # DNS operations
+
+# Performance profiling
+memory-profiler>=0.60.0    # Memory usage profiling
+line-profiler>=3.5.0       # Line-by-line profiling
+
+# Optional: Database support (for storing test results)
+sqlite3  # Built-in Python module
+
+# Optional: Notification support
+smtplib  # Built-in Python module for email notifications 
