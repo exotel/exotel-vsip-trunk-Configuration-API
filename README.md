@@ -123,7 +123,22 @@ Copy `.env.example` to `.env` and configure with your Exotel credentials:
 
 ## 🧪 Testing Framework
 
-### **Comprehensive Test Suite**
+### **📬 Postman Collection (Recommended for Quick Testing)**
+```bash
+# Import files from postman/ directory:
+# - Exotel_vSIP_API_Collection.json
+# - Exotel_vSIP_Environment.json
+
+# Features:
+# ✅ All 5 API operations ready to use
+# 🔐 Automatic authentication
+# 🔄 TRUNK_SID auto-population
+# ✅ Response validation tests
+# 📚 Rich documentation
+```
+👉 **See [postman/POSTMAN_GUIDE.md](postman/POSTMAN_GUIDE.md) for complete Postman setup**
+
+### **Comprehensive Python Test Suite**
 ```bash
 # Run all API tests (35+ scenarios)
 python3 tests/test_all_apis.py

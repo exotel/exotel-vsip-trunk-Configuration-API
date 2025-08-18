@@ -1,0 +1,100 @@
+{
+  "id": "exotel-vsip-environment",
+  "name": "Exotel vSIP Environment",
+  "values": [
+    {
+      "key": "EXO_AUTH_KEY",
+      "value": "your_exotel_api_key_here",
+      "description": "Your Exotel API Key - Get from https://my.in.exotel.com/apisettings/site#api-credentials",
+      "enabled": true,
+      "type": "secret"
+    },
+    {
+      "key": "EXO_AUTH_TOKEN",
+      "value": "your_exotel_auth_token_here",
+      "description": "Your Exotel Auth Token - Get from https://my.in.exotel.com/apisettings/site#api-credentials",
+      "enabled": true,
+      "type": "secret"
+    },
+    {
+      "key": "EXO_SUBSCRIBIX_DOMAIN",
+      "value": "api.in.exotel.com",
+      "description": "Exotel API Domain (India: api.in.exotel.com, Singapore: api.sg.exotel.com, US: api.us.exotel.com)",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "EXO_ACCOUNT_SID",
+      "value": "your_account_sid_here",
+      "description": "Your Exotel Account SID - Get from https://my.in.exotel.com/apisettings/site#api-credentials",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "TRUNK_NAME",
+      "value": "postman_trunk",
+      "description": "Trunk name (max 16 characters, alphanumeric + underscore only)",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "NSO_CODE",
+      "value": "ANY-ANY",
+      "description": "Network Service Operator code (usually ANY-ANY)",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "DID_NUMBER",
+      "value": "+1234567890",
+      "description": "DID/Virtual Number in E.164 format - Get from https://my.in.exotel.com/numbers",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "WHITELIST_IP",
+      "value": "192.168.1.100",
+      "description": "IP address to whitelist for SIP traffic (your SIP server's public IP)",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "WHITELIST_MASK",
+      "value": "32",
+      "description": "Subnet mask for IP whitelisting (16-32, typically 32 for single IP)",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "TRUNK_DEST_IP",
+      "value": "192.168.1.200",
+      "description": "Your SIP server IP address for destination URIs",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "TRUNK_DEST_PORT",
+      "value": "5060",
+      "description": "SIP port on your server (usually 5060)",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "EXOPHONE",
+      "value": "+1234567890",
+      "description": "Virtual number for trunk alias - Get from https://my.in.exotel.com/numbers",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "TRUNK_SID",
+      "value": "",
+      "description": "Trunk SID (automatically populated after trunk creation)",
+      "enabled": true,
+      "type": "default"
+    }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2025-08-18T12:50:00.000Z",
+  "_postman_exported_using": "Postman/10.0.0"
+} 

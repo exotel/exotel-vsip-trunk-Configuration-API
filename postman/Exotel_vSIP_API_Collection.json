@@ -1,0 +1,538 @@
+{
+  "info": {
+    "name": "Exotel vSIP Trunk APIs",
+    "description": "Complete collection for Exotel vSIP PSTN Connectivity APIs\n\n🚀 **Features:**\n- All 5 core vSIP operations\n- Automatic Basic Authentication\n- Environment variables for easy configuration\n- Response tests and validation\n- Complete documentation\n\n📋 **Operations Included:**\n1. Trunk Creation\n2. DID Mapping\n3. IP Whitelisting\n4. Destination URIs (UDP/TCP/TLS)\n5. Trunk Settings\n\n🔧 **Setup:**\n1. Import this collection\n2. Import the environment file\n3. Set your Exotel credentials in environment variables\n4. Start testing!\n\n📚 **Documentation:** https://github.com/Saurabhsharma209/exotel-vsip-trunk-Configuration-API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "12345",
+    "_collection_link": "https://github.com/Saurabhsharma209/exotel-vsip-trunk-Configuration-API"
+  },
+  "item": [
+    {
+      "name": "1. Trunk Creation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test response status",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Parse response",
+              "const responseJson = pm.response.json();",
+              "",
+              "// Test successful response",
+              "pm.test(\"Response has success status\", function () {",
+              "    pm.expect(responseJson.response.status).to.eql(\"success\");",
+              "});",
+              "",
+              "// Extract and save trunk SID",
+              "if (responseJson.response.status === \"success\" && responseJson.response.data) {",
+              "    const trunkSid = responseJson.response.data.trunk_sid;",
+              "    pm.environment.set(\"TRUNK_SID\", trunkSid);",
+              "    console.log(\"✅ Trunk created successfully: \" + trunkSid);",
+              "    ",
+              "    pm.test(\"Trunk SID extracted\", function () {",
+              "        pm.expect(trunkSid).to.be.a(\"string\");",
+              "        pm.expect(trunkSid).to.match(/^trmum1[a-zA-Z0-9]+$/);",
+              "    });",
+              "} else {",
+              "    console.log(\"❌ Trunk creation failed: \" + JSON.stringify(responseJson.response.error_data));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"trunk_name\": \"{{TRUNK_NAME}}\",\n  \"nso_code\": \"{{NSO_CODE}}\",\n  \"domain_name\": \"{{EXO_ACCOUNT_SID}}.pstn.exotel.com\"\n}"
+        },
+        "url": {
+          "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks",
+          "protocol": "https",
+          "host": [
+            "{{EXO_SUBSCRIBIX_DOMAIN}}"
+          ],
+          "path": [
+            "v2",
+            "accounts",
+            "{{EXO_ACCOUNT_SID}}",
+            "trunks"
+          ]
+        },
+        "description": "Creates a new SIP trunk with specified name and NSO code.\n\n**Parameters:**\n- `trunk_name`: Unique name for the trunk (max 16 chars, alphanumeric + underscore)\n- `nso_code`: Network Service Operator code (usually \"ANY-ANY\")\n- `domain_name`: Domain for the trunk (format: {account_sid}.pstn.exotel.com)\n\n**Response:**\n- Returns trunk details including `trunk_sid` which is automatically saved to environment variables for subsequent requests."
+      }
+    },
+    {
+      "name": "2. Map DID to Trunk",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test response status",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Parse response",
+              "const responseJson = pm.response.json();",
+              "",
+              "// Test successful response",
+              "pm.test(\"DID mapping successful\", function () {",
+              "    pm.expect(responseJson.response.status).to.eql(\"success\");",
+              "});",
+              "",
+              "// Validate DID mapping data",
+              "if (responseJson.response.status === \"success\" && responseJson.response.data) {",
+              "    const didData = responseJson.response.data;",
+              "    console.log(\"✅ DID mapped successfully: \" + didData.phone_number + \" → \" + didData.trunk_sid);",
+              "    ",
+              "    pm.test(\"DID mapping data is valid\", function () {",
+              "        pm.expect(didData.phone_number).to.be.a(\"string\");",
+              "        pm.expect(didData.trunk_sid).to.be.a(\"string\");",
+              "        pm.expect(didData.id).to.be.a(\"string\");",
+              "    });",
+              "} else {",
+              "    console.log(\"❌ DID mapping failed: \" + JSON.stringify(responseJson.response.error_data));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone_number\": \"{{DID_NUMBER}}\"\n}"
+        },
+        "url": {
+          "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/phone-numbers",
+          "protocol": "https",
+          "host": [
+            "{{EXO_SUBSCRIBIX_DOMAIN}}"
+          ],
+          "path": [
+            "v2",
+            "accounts",
+            "{{EXO_ACCOUNT_SID}}",
+            "trunks",
+            "{{TRUNK_SID}}",
+            "phone-numbers"
+          ]
+        },
+        "description": "Maps a DID (phone number) to the specified trunk.\n\n**Prerequisites:**\n- Trunk must be created first (run \"1. Trunk Creation\")\n- TRUNK_SID will be automatically populated from trunk creation\n\n**Parameters:**\n- `phone_number`: DID in E.164 format (+CountryCodeNumber)\n\n**Response:**\n- Returns mapping details including mapping ID and timestamps"
+      }
+    },
+    {
+      "name": "3. Whitelist IP Address",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test response status",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Parse response",
+              "const responseJson = pm.response.json();",
+              "",
+              "// Test successful response",
+              "pm.test(\"IP whitelisting successful\", function () {",
+              "    pm.expect(responseJson.response.status).to.eql(\"success\");",
+              "});",
+              "",
+              "// Validate IP whitelist data",
+              "if (responseJson.response.status === \"success\" && responseJson.response.data) {",
+              "    const ipData = responseJson.response.data;",
+              "    console.log(\"✅ IP whitelisted successfully: \" + ipData.ip + \"/\" + ipData.mask + \" (ID: \" + ipData.id + \")\");",
+              "    ",
+              "    pm.test(\"IP whitelist data is valid\", function () {",
+              "        pm.expect(ipData.ip).to.be.a(\"string\");",
+              "        pm.expect(ipData.mask).to.be.a(\"number\");",
+              "        pm.expect(ipData.id).to.be.a(\"string\");",
+              "        pm.expect(ipData.trunk_sid).to.be.a(\"string\");",
+              "    });",
+              "} else {",
+              "    console.log(\"❌ IP whitelisting failed: \" + JSON.stringify(responseJson.response.error_data));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ip\": \"{{WHITELIST_IP}}\",\n  \"mask\": {{WHITELIST_MASK}}\n}"
+        },
+        "url": {
+          "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/whitelisted-ips",
+          "protocol": "https",
+          "host": [
+            "{{EXO_SUBSCRIBIX_DOMAIN}}"
+          ],
+          "path": [
+            "v2",
+            "accounts",
+            "{{EXO_ACCOUNT_SID}}",
+            "trunks",
+            "{{TRUNK_SID}}",
+            "whitelisted-ips"
+          ]
+        },
+        "description": "Adds an IP address to the trunk's whitelist for secure SIP communication.\n\n**Prerequisites:**\n- Trunk must be created first\n\n**Parameters:**\n- `ip`: IPv4 address to whitelist\n- `mask`: Subnet mask (16-32, typically 32 for single IP)\n\n**Response:**\n- Returns whitelist entry details including unique ID"
+      }
+    },
+    {
+      "name": "4a. Add UDP Destination",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test response status",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Parse response",
+              "const responseJson = pm.response.json();",
+              "",
+              "// Test successful response array",
+              "pm.test(\"UDP destination added successfully\", function () {",
+              "    pm.expect(responseJson.response).to.be.an(\"array\");",
+              "    pm.expect(responseJson.response[0].status).to.eql(\"success\");",
+              "});",
+              "",
+              "// Validate destination data",
+              "if (responseJson.response && responseJson.response[0] && responseJson.response[0].status === \"success\") {",
+              "    const destData = responseJson.response[0].data;",
+              "    console.log(\"✅ UDP destination added: \" + destData.destination + \" (ID: \" + destData.id + \")\");",
+              "    ",
+              "    pm.test(\"UDP destination data is valid\", function () {",
+              "        pm.expect(destData.destination).to.include(\"sip:\");",
+              "        pm.expect(destData.id).to.be.a(\"string\");",
+              "        pm.expect(destData.trunk_sid).to.be.a(\"string\");",
+              "    });",
+              "} else {",
+              "    console.log(\"❌ UDP destination failed: \" + JSON.stringify(responseJson.response));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"destinations\": [\n    {\n      \"destination\": \"{{TRUNK_DEST_IP}}:{{TRUNK_DEST_PORT}}\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris",
+          "protocol": "https",
+          "host": [
+            "{{EXO_SUBSCRIBIX_DOMAIN}}"
+          ],
+          "path": [
+            "v2",
+            "accounts",
+            "{{EXO_ACCOUNT_SID}}",
+            "trunks",
+            "{{TRUNK_SID}}",
+            "destination-uris"
+          ]
+        },
+        "description": "Adds UDP destination URI to the trunk for SIP communication.\n\n**Prerequisites:**\n- Trunk must be created first\n- IP should be whitelisted\n\n**Parameters:**\n- `destinations`: Array of destination objects\n- `destination`: IP:Port format (UDP is default)\n\n**Response:**\n- Returns destination details with SIP URI format"
+      }
+    },
+    {
+      "name": "4b. Add TCP Destination",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test response status",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Parse response",
+              "const responseJson = pm.response.json();",
+              "",
+              "// Test successful response array",
+              "pm.test(\"TCP destination added successfully\", function () {",
+              "    pm.expect(responseJson.response).to.be.an(\"array\");",
+              "    pm.expect(responseJson.response[0].status).to.eql(\"success\");",
+              "});",
+              "",
+              "// Validate destination data",
+              "if (responseJson.response && responseJson.response[0] && responseJson.response[0].status === \"success\") {",
+              "    const destData = responseJson.response[0].data;",
+              "    console.log(\"✅ TCP destination added: \" + destData.destination + \" (ID: \" + destData.id + \")\");",
+              "    ",
+              "    pm.test(\"TCP destination data is valid\", function () {",
+              "        pm.expect(destData.destination).to.include(\"transport=tcp\");",
+              "        pm.expect(destData.id).to.be.a(\"string\");",
+              "        pm.expect(destData.trunk_sid).to.be.a(\"string\");",
+              "    });",
+              "} else {",
+              "    console.log(\"❌ TCP destination failed: \" + JSON.stringify(responseJson.response));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"destinations\": [\n    {\n      \"destination\": \"{{TRUNK_DEST_IP}}:{{TRUNK_DEST_PORT}};transport=tcp\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris",
+          "protocol": "https",
+          "host": [
+            "{{EXO_SUBSCRIBIX_DOMAIN}}"
+          ],
+          "path": [
+            "v2",
+            "accounts",
+            "{{EXO_ACCOUNT_SID}}",
+            "trunks",
+            "{{TRUNK_SID}}",
+            "destination-uris"
+          ]
+        },
+        "description": "Adds TCP destination URI to the trunk for SIP communication over TCP.\n\n**Prerequisites:**\n- Trunk must be created first\n- IP should be whitelisted\n\n**Parameters:**\n- `destinations`: Array of destination objects\n- `destination`: IP:Port;transport=tcp format\n\n**Response:**\n- Returns destination details with SIP URI format including TCP transport"
+      }
+    },
+    {
+      "name": "4c. Add TLS Destination",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test response status",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Parse response",
+              "const responseJson = pm.response.json();",
+              "",
+              "// Test successful response array",
+              "pm.test(\"TLS destination added successfully\", function () {",
+              "    pm.expect(responseJson.response).to.be.an(\"array\");",
+              "    pm.expect(responseJson.response[0].status).to.eql(\"success\");",
+              "});",
+              "",
+              "// Validate destination data",
+              "if (responseJson.response && responseJson.response[0] && responseJson.response[0].status === \"success\") {",
+              "    const destData = responseJson.response[0].data;",
+              "    console.log(\"✅ TLS destination added: \" + destData.destination + \" (ID: \" + destData.id + \")\");",
+              "    ",
+              "    pm.test(\"TLS destination data is valid\", function () {",
+              "        pm.expect(destData.destination).to.include(\"transport=tls\");",
+              "        pm.expect(destData.id).to.be.a(\"string\");",
+              "        pm.expect(destData.trunk_sid).to.be.a(\"string\");",
+              "    });",
+              "} else {",
+              "    console.log(\"❌ TLS destination failed: \" + JSON.stringify(responseJson.response));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"destinations\": [\n    {\n      \"destination\": \"{{TRUNK_DEST_IP}}:{{TRUNK_DEST_PORT}};transport=tls\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris",
+          "protocol": "https",
+          "host": [
+            "{{EXO_SUBSCRIBIX_DOMAIN}}"
+          ],
+          "path": [
+            "v2",
+            "accounts",
+            "{{EXO_ACCOUNT_SID}}",
+            "trunks",
+            "{{TRUNK_SID}}",
+            "destination-uris"
+          ]
+        },
+        "description": "Adds TLS destination URI to the trunk for secure SIP communication over TLS.\n\n**Prerequisites:**\n- Trunk must be created first\n- IP should be whitelisted\n- TLS certificate must be properly configured on destination server\n\n**Parameters:**\n- `destinations`: Array of destination objects\n- `destination`: IP:Port;transport=tls format\n\n**Response:**\n- Returns destination details with SIP URI format including TLS transport"
+      }
+    },
+    {
+      "name": "5. Set Trunk Alias",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test response status",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Parse response",
+              "const responseJson = pm.response.json();",
+              "",
+              "// Test successful response array",
+              "pm.test(\"Trunk alias set successfully\", function () {",
+              "    pm.expect(responseJson.response).to.be.an(\"array\");",
+              "    pm.expect(responseJson.response[0].status).to.eql(\"success\");",
+              "});",
+              "",
+              "// Validate alias data",
+              "if (responseJson.response && responseJson.response[0] && responseJson.response[0].status === \"success\") {",
+              "    const aliasData = responseJson.response[0].data;",
+              "    console.log(\"✅ Trunk alias set: \" + aliasData.name + \" = \" + aliasData.value);",
+              "    ",
+              "    pm.test(\"Trunk alias data is valid\", function () {",
+              "        pm.expect(aliasData.name).to.eql(\"trunk_external_alias\");",
+              "        pm.expect(aliasData.value).to.be.a(\"string\");",
+              "        pm.expect(aliasData.trunk_sid).to.be.a(\"string\");",
+              "    });",
+              "} else {",
+              "    console.log(\"❌ Trunk alias setting failed: \" + JSON.stringify(responseJson.response));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"settings\": [\n    {\n      \"name\": \"trunk_external_alias\",\n      \"value\": \"{{EXOPHONE}}\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/settings",
+          "protocol": "https",
+          "host": [
+            "{{EXO_SUBSCRIBIX_DOMAIN}}"
+          ],
+          "path": [
+            "v2",
+            "accounts",
+            "{{EXO_ACCOUNT_SID}}",
+            "trunks",
+            "{{TRUNK_SID}}",
+            "settings"
+          ]
+        },
+        "description": "Sets optional trunk configuration settings like external alias.\n\n**Prerequisites:**\n- Trunk must be created first\n\n**Parameters:**\n- `settings`: Array of setting objects\n- `name`: Setting name (e.g., \"trunk_external_alias\")\n- `value`: Setting value (e.g., phone number for alias)\n\n**Response:**\n- Returns setting details with timestamps"
+      }
+    }
+  ],
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "username",
+        "value": "{{EXO_AUTH_KEY}}",
+        "type": "string"
+      },
+      {
+        "key": "password",
+        "value": "{{EXO_AUTH_TOKEN}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Pre-request script to validate environment variables",
+          "const requiredVars = ['EXO_AUTH_KEY', 'EXO_AUTH_TOKEN', 'EXO_SUBSCRIBIX_DOMAIN', 'EXO_ACCOUNT_SID'];",
+          "const missingVars = [];",
+          "",
+          "requiredVars.forEach(varName => {",
+          "    if (!pm.environment.get(varName)) {",
+          "        missingVars.push(varName);",
+          "    }",
+          "});",
+          "",
+          "if (missingVars.length > 0) {",
+          "    console.log('❌ Missing required environment variables: ' + missingVars.join(', '));",
+          "    console.log('Please set these variables in your Postman environment.');",
+          "} else {",
+          "    console.log('✅ All required environment variables are set');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}",
+      "type": "string"
+    }
+  ]
+} 
