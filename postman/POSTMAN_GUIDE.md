@@ -105,12 +105,12 @@ This Postman collection provides a complete set of requests for testing all Exot
 | **Configuration** |
 | `TRUNK_NAME` | ✅ | Trunk Name | `postman_trunk` |
 | `NSO_CODE` | ✅ | NSO Code | `ANY-ANY` |
-| `DID_NUMBER` | ⚠️ | Virtual Number | `+918048636999` |
+| `DID_NUMBER` | ⚠️ | Virtual Number | `+91XXXXXXXXXX` |
 | `WHITELIST_IP` | ⚠️ | SIP Server IP | `192.168.1.100` |
 | `WHITELIST_MASK` | ⚠️ | Subnet Mask | `32` |
 | `TRUNK_DEST_IP` | ⚠️ | Destination IP | `192.168.1.200` |
 | `TRUNK_DEST_PORT` | ⚠️ | SIP Port | `5060` |
-| `EXOPHONE` | ⚠️ | Alias Number | `+918048636999` |
+| `EXOPHONE` | ⚠️ | Alias Number | `+91XXXXXXXXXX` |
 | **Auto-populated** |
 | `TRUNK_SID` | 🔄 | Trunk ID | `trmum1XXXXX` |
 
