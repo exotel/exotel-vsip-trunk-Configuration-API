@@ -44,6 +44,50 @@ public class _Client {
     }
     
     /**
+     * Make a GET request to the Exotel API
+     */
+    static String get(String path) throws Exception {
+        HttpRequest req = HttpRequest.newBuilder()
+            .uri(URI.create(base() + path))
+            .header("Content-Type", "application/json")
+            .timeout(Duration.ofSeconds(30))
+            .GET()
+            .build();
+        
+        HttpResponse<String> resp = HttpClient.newHttpClient().send(req, HttpResponse.BodyHandlers.ofString());
+        
+        if (resp.statusCode() >= 400) {
+            System.err.printf("HTTP Error %d: %s%n", resp.statusCode(), resp.body());
+            System.exit(1);
+        }
+        
+        System.out.println(resp.body());
+        return resp.body();
+    }
+    
+    /**
+     * Make a DELETE request to the Exotel API
+     */
+    static String delete(String path) throws Exception {
+        HttpRequest req = HttpRequest.newBuilder()
+            .uri(URI.create(base() + path))
+            .header("Content-Type", "application/json")
+            .timeout(Duration.ofSeconds(30))
+            .DELETE()
+            .build();
+        
+        HttpResponse<String> resp = HttpClient.newHttpClient().send(req, HttpResponse.BodyHandlers.ofString());
+        
+        if (resp.statusCode() >= 400) {
+            System.err.printf("HTTP Error %d: %s%n", resp.statusCode(), resp.body());
+            System.exit(1);
+        }
+        
+        System.out.println(resp.body());
+        return resp.body();
+    }
+    
+    /**
      * Get environment variable with default value
      */
     static String getenvDefault(String key, String defaultValue) {

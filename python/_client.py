@@ -41,4 +41,48 @@ def post(path, payload):
         sys.exit(1)
     except Exception as e:
         print(f"Error: {e}")
+        sys.exit(1)
+
+def get(path):
+    """Make a GET request to the Exotel API"""
+    try:
+        req = urllib.request.Request(
+            BASE + path, 
+            headers={'Content-Type': 'application/json'}, 
+            method='GET'
+        )
+        
+        with urllib.request.urlopen(req) as resp:
+            body = resp.read().decode('utf-8')
+            print(body)
+            return json.loads(body)
+            
+    except urllib.error.HTTPError as e:
+        print(f"HTTP Error {e.code}: {e.reason}")
+        print(e.read().decode('utf-8'))
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+def delete(path):
+    """Make a DELETE request to the Exotel API"""
+    try:
+        req = urllib.request.Request(
+            BASE + path, 
+            headers={'Content-Type': 'application/json'}, 
+            method='DELETE'
+        )
+        
+        with urllib.request.urlopen(req) as resp:
+            body = resp.read().decode('utf-8')
+            print(body)
+            return json.loads(body) if body else {}
+            
+    except urllib.error.HTTPError as e:
+        print(f"HTTP Error {e.code}: {e.reason}")
+        print(e.read().decode('utf-8'))
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error: {e}")
         sys.exit(1) 

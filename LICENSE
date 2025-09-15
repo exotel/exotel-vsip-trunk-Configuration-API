@@ -1,22 +1,21 @@
-Exotel API Sample Code License
+MIT License
 
-© 2025 Exotel Techcom Pvt. Ltd.
+Copyright (c) 2024 Saurabh Sharma
 
-Permission is hereby granted to use this sample code for demonstration and 
-integration purposes with Exotel's public APIs, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-1. This code is provided "as is" without warranty of any kind, express or implied.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-2. This code is intended for educational and integration purposes only.
-
-3. Any commercial use requires separate agreement with Exotel Techcom Pvt. Ltd.
-
-4. Redistribution of this code must retain this copyright notice and license.
-
-5. The code may not be used to compete with or replicate Exotel's services.
-
-For questions regarding licensing, contact: support@exotel.com
-
-EXOTEL TECHCOM PVT. LTD. DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, 
-INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR 
-A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE. 

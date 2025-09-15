@@ -48,4 +48,66 @@ function exo_post($path, $payload) {
     
     echo $resp . "\n";
     return json_decode($resp, true);
+}
+
+/**
+ * Make a GET request to the Exotel API
+ */
+function exo_get($path) {
+    $ch = curl_init(exotel_base() . $path);
+    
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_FAILONERROR, false);
+    
+    $resp = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    
+    if ($resp === false) {
+        echo "cURL Error: " . curl_error($ch) . "\n";
+        curl_close($ch);
+        exit(1);
+    }
+    
+    curl_close($ch);
+    
+    if ($http_code >= 400) {
+        echo "HTTP Error $http_code: $resp\n";
+        exit(1);
+    }
+    
+    echo $resp . "\n";
+    return json_decode($resp, true);
+}
+
+/**
+ * Make a DELETE request to the Exotel API
+ */
+function exo_delete($path) {
+    $ch = curl_init(exotel_base() . $path);
+    
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_FAILONERROR, false);
+    
+    $resp = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    
+    if ($resp === false) {
+        echo "cURL Error: " . curl_error($ch) . "\n";
+        curl_close($ch);
+        exit(1);
+    }
+    
+    curl_close($ch);
+    
+    if ($http_code >= 400) {
+        echo "HTTP Error $http_code: $resp\n";
+        exit(1);
+    }
+    
+    echo $resp . "\n";
+    return $resp ? json_decode($resp, true) : [];
 } 
