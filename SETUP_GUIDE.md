@@ -23,8 +23,8 @@
 
 1. **Clone Repository**:
    ```bash
-   git clone https://github.com/your-username/exotel-vsip-trunk-api.git
-   cd exotel-vsip-trunk-api
+       git clone https://github.com/Saurabhsharma209/exotel-vsip-trunk-Configuration-API.git
+    cd exotel-vsip-trunk-Configuration-API
    ```
 
 2. **Setup Environment**:

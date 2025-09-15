@@ -4,7 +4,7 @@
 
 | File | Description |
 |------|-------------|
-| `Exotel_vSIP_API_Collection.json` | Complete Postman collection with all 5 API operations |
+| `Exotel_vSIP_API_Collection.json` | Complete Postman collection with all 10 API operations |
 | `Exotel_vSIP_Environment.json` | Environment variables template |
 | `POSTMAN_GUIDE.md` | Comprehensive setup and usage guide |
 | `README.md` | This file |
@@ -17,12 +17,13 @@
 
 ## ✨ **Features**
 
-- ✅ **All 5 API Operations**: Complete coverage
+- ✅ **All 10 API Operations**: Complete CRUD coverage (5 POST, 4 GET, 1 DELETE)
 - 🔐 **Automatic Authentication**: Basic Auth pre-configured
 - 🔄 **Auto-Population**: TRUNK_SID saved automatically
 - ✅ **Response Validation**: Built-in tests for all responses
 - 📝 **Rich Documentation**: Detailed descriptions and examples
 - 🌍 **Multi-Region Support**: India, Singapore, US
+- ⚠️ **Safety Features**: DELETE operation with warnings and auto-cleanup
 
 ## 📚 **Documentation**
 

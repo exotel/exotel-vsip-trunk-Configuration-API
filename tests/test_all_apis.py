@@ -260,6 +260,284 @@ class ExotelAPITester:
         self.test_results.append(test_result)
         return test_result
     
+    def make_get_request(self, endpoint: str, test_name: str) -> Tuple[bool, Dict[str, Any]]:
+        """Make GET API request with comprehensive error handling"""
+        if not self.base_url:
+            return False, {"error": "Missing credentials", "details": "Required environment variables not set"}
+        
+        # Build URL without credentials embedded
+        domain = os.getenv('EXO_SUBSCRIBIX_DOMAIN')
+        account_sid = os.getenv('EXO_ACCOUNT_SID')
+        url = f"https://{domain}/v2/accounts/{account_sid}{endpoint}"
+        
+        self.logger.info(f"Testing {test_name}: {endpoint}")
+        
+        try:
+            # Create GET request with separate authentication
+            req = urllib.request.Request(
+                url,
+                headers={'Content-Type': 'application/json'},
+                method='GET'
+            )
+            
+            # Add Basic Authentication
+            import base64
+            auth_key = os.getenv('EXO_AUTH_KEY')
+            auth_token = os.getenv('EXO_AUTH_TOKEN')
+            credentials = f"{auth_key}:{auth_token}"
+            encoded_credentials = base64.b64encode(credentials.encode()).decode()
+            req.add_header('Authorization', f'Basic {encoded_credentials}')
+            
+            # Handle SSL context for macOS
+            import ssl
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            
+            with urllib.request.urlopen(req, timeout=30, context=ssl_context) as response:
+                response_data = response.read().decode('utf-8')
+                self.logger.info(f"✅ {test_name} - Status: {response.status}")
+                self.logger.debug(f"Response: {response_data}")
+                
+                return True, {
+                    "status_code": response.status,
+                    "response": json.loads(response_data) if response_data else {},
+                    "headers": dict(response.headers)
+                }
+                
+        except urllib.error.HTTPError as e:
+            error_response = e.read().decode('utf-8')
+            self.logger.error(f"❌ {test_name} - HTTP {e.code}: {e.reason}")
+            self.logger.error(f"Error response: {error_response}")
+            
+            return False, {
+                "status_code": e.code,
+                "error": e.reason,
+                "response": json.loads(error_response) if error_response else {},
+                "headers": dict(e.headers) if hasattr(e, 'headers') else {}
+            }
+            
+        except Exception as e:
+            self.logger.error(f"❌ {test_name} - Exception: {str(e)}")
+            return False, {"error": str(e), "type": type(e).__name__}
+    
+    def make_delete_request(self, endpoint: str, test_name: str) -> Tuple[bool, Dict[str, Any]]:
+        """Make DELETE API request with comprehensive error handling"""
+        if not self.base_url:
+            return False, {"error": "Missing credentials", "details": "Required environment variables not set"}
+        
+        # Build URL without credentials embedded
+        domain = os.getenv('EXO_SUBSCRIBIX_DOMAIN')
+        account_sid = os.getenv('EXO_ACCOUNT_SID')
+        url = f"https://{domain}/v2/accounts/{account_sid}{endpoint}"
+        
+        self.logger.info(f"Testing {test_name}: {endpoint}")
+        
+        try:
+            # Create DELETE request with separate authentication
+            req = urllib.request.Request(
+                url,
+                headers={'Content-Type': 'application/json'},
+                method='DELETE'
+            )
+            
+            # Add Basic Authentication
+            import base64
+            auth_key = os.getenv('EXO_AUTH_KEY')
+            auth_token = os.getenv('EXO_AUTH_TOKEN')
+            credentials = f"{auth_key}:{auth_token}"
+            encoded_credentials = base64.b64encode(credentials.encode()).decode()
+            req.add_header('Authorization', f'Basic {encoded_credentials}')
+            
+            # Handle SSL context for macOS
+            import ssl
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            
+            with urllib.request.urlopen(req, timeout=30, context=ssl_context) as response:
+                response_data = response.read().decode('utf-8')
+                self.logger.info(f"✅ {test_name} - Status: {response.status}")
+                self.logger.debug(f"Response: {response_data}")
+                
+                return True, {
+                    "status_code": response.status,
+                    "response": json.loads(response_data) if response_data else {},
+                    "headers": dict(response.headers)
+                }
+                
+        except urllib.error.HTTPError as e:
+            error_response = e.read().decode('utf-8')
+            self.logger.error(f"❌ {test_name} - HTTP {e.code}: {e.reason}")
+            self.logger.error(f"Error response: {error_response}")
+            
+            return False, {
+                "status_code": e.code,
+                "error": e.reason,
+                "response": json.loads(error_response) if error_response else {},
+                "headers": dict(e.headers) if hasattr(e, 'headers') else {}
+            }
+            
+        except Exception as e:
+            self.logger.error(f"❌ {test_name} - Exception: {str(e)}")
+            return False, {"error": str(e), "type": type(e).__name__}
+
+    def test_get_destination_uris(self, trunk_sid: str = None) -> Dict[str, Any]:
+        """Test GET destination URIs API"""
+        if not trunk_sid:
+            trunk_sid = os.getenv('TRUNK_SID')
+            if not trunk_sid:
+                self.logger.error("❌ TRUNK_SID required for GET destination URIs test")
+                return {"success": False, "error": "Missing TRUNK_SID", "skipped": True}
+        
+        endpoint = f"/trunks/{trunk_sid}/destination-uris"
+        success, result = self.make_get_request(endpoint, "GET Destination URIs")
+        
+        test_result = {
+            "test_name": "get_destination_uris",
+            "endpoint": endpoint,
+            "method": "GET",
+            "trunk_sid": trunk_sid,
+            "success": success,
+            "result": result,
+            "timestamp": datetime.datetime.now().isoformat()
+        }
+        
+        self.test_results.append(test_result)
+        
+        if success:
+            response_data = result.get('response', {})
+            if response_data.get('response', {}).get('status') == 'success':
+                destinations = response_data.get('response', {}).get('data', [])
+                self.logger.info(f"✅ Retrieved {len(destinations)} destination URI(s)")
+        
+        return test_result
+
+    def test_get_whitelisted_ips(self, trunk_sid: str = None) -> Dict[str, Any]:
+        """Test GET whitelisted IPs API"""
+        if not trunk_sid:
+            trunk_sid = os.getenv('TRUNK_SID')
+            if not trunk_sid:
+                self.logger.error("❌ TRUNK_SID required for GET whitelisted IPs test")
+                return {"success": False, "error": "Missing TRUNK_SID", "skipped": True}
+        
+        endpoint = f"/trunks/{trunk_sid}/whitelisted-ips"
+        success, result = self.make_get_request(endpoint, "GET Whitelisted IPs")
+        
+        test_result = {
+            "test_name": "get_whitelisted_ips",
+            "endpoint": endpoint,
+            "method": "GET",
+            "trunk_sid": trunk_sid,
+            "success": success,
+            "result": result,
+            "timestamp": datetime.datetime.now().isoformat()
+        }
+        
+        self.test_results.append(test_result)
+        
+        if success:
+            response_data = result.get('response', {})
+            if response_data.get('response', {}).get('status') == 'success':
+                ips = response_data.get('response', {}).get('data', [])
+                self.logger.info(f"✅ Retrieved {len(ips)} whitelisted IP(s)")
+        
+        return test_result
+
+    def test_get_credentials(self, trunk_sid: str = None) -> Dict[str, Any]:
+        """Test GET credentials API"""
+        if not trunk_sid:
+            trunk_sid = os.getenv('TRUNK_SID')
+            if not trunk_sid:
+                self.logger.error("❌ TRUNK_SID required for GET credentials test")
+                return {"success": False, "error": "Missing TRUNK_SID", "skipped": True}
+        
+        endpoint = f"/trunks/{trunk_sid}/credentials"
+        success, result = self.make_get_request(endpoint, "GET Credentials")
+        
+        test_result = {
+            "test_name": "get_credentials",
+            "endpoint": endpoint,
+            "method": "GET",
+            "trunk_sid": trunk_sid,
+            "success": success,
+            "result": result,
+            "timestamp": datetime.datetime.now().isoformat()
+        }
+        
+        self.test_results.append(test_result)
+        
+        if success:
+            response_data = result.get('response', {})
+            if response_data.get('response', {}).get('status') == 'success':
+                credentials = response_data.get('response', {}).get('data', {})
+                self.logger.info(f"✅ Retrieved credentials: username={credentials.get('username', 'N/A')}")
+        
+        return test_result
+
+    def test_get_phone_numbers(self, trunk_sid: str = None) -> Dict[str, Any]:
+        """Test GET phone numbers API"""
+        if not trunk_sid:
+            trunk_sid = os.getenv('TRUNK_SID')
+            if not trunk_sid:
+                self.logger.error("❌ TRUNK_SID required for GET phone numbers test")
+                return {"success": False, "error": "Missing TRUNK_SID", "skipped": True}
+        
+        endpoint = f"/trunks/{trunk_sid}/phone-numbers"
+        success, result = self.make_get_request(endpoint, "GET Phone Numbers")
+        
+        test_result = {
+            "test_name": "get_phone_numbers",
+            "endpoint": endpoint,
+            "method": "GET",
+            "trunk_sid": trunk_sid,
+            "success": success,
+            "result": result,
+            "timestamp": datetime.datetime.now().isoformat()
+        }
+        
+        self.test_results.append(test_result)
+        
+        if success:
+            response_data = result.get('response', {})
+            if response_data.get('response', {}).get('status') == 'success':
+                phone_numbers = response_data.get('response', {}).get('data', [])
+                self.logger.info(f"✅ Retrieved {len(phone_numbers)} phone number(s)")
+        
+        return test_result
+
+    def test_delete_trunk(self, trunk_sid: str = None) -> Dict[str, Any]:
+        """Test DELETE trunk API - WARNING: This will permanently delete the trunk!"""
+        if not trunk_sid:
+            trunk_sid = os.getenv('TRUNK_SID')
+            if not trunk_sid:
+                self.logger.error("❌ TRUNK_SID required for DELETE trunk test")
+                return {"success": False, "error": "Missing TRUNK_SID", "skipped": True}
+        
+        self.logger.warning(f"⚠️ WARNING: About to DELETE trunk {trunk_sid} - this is irreversible!")
+        
+        endpoint = f"/trunks?trunk_sid={trunk_sid}"
+        success, result = self.make_delete_request(endpoint, "DELETE Trunk")
+        
+        test_result = {
+            "test_name": "delete_trunk",
+            "endpoint": endpoint,
+            "method": "DELETE",
+            "trunk_sid": trunk_sid,
+            "success": success,
+            "result": result,
+            "timestamp": datetime.datetime.now().isoformat()
+        }
+        
+        self.test_results.append(test_result)
+        
+        if success:
+            response_data = result.get('response', {})
+            if response_data.get('response', {}).get('status') == 'success':
+                self.logger.info(f"✅ Trunk {trunk_sid} deleted successfully")
+        
+        return test_result
+    
     def run_all_tests(self) -> Dict[str, Any]:
         """Run comprehensive test suite"""
         self.logger.info("🚀 Starting comprehensive API test suite")
@@ -289,6 +567,16 @@ class ExotelAPITester:
         
         # Test 5: Set trunk alias
         self.test_set_trunk_alias(trunk_sid)
+        
+        # Test 6-9: GET operations (read-only, safe to run)
+        if trunk_sid:
+            self.test_get_destination_uris(trunk_sid)
+            self.test_get_whitelisted_ips(trunk_sid)
+            self.test_get_credentials(trunk_sid)
+            self.test_get_phone_numbers(trunk_sid)
+        
+        # Note: DELETE test is not run by default due to destructive nature
+        # To test DELETE, run: python test_all_apis.py --test delete --trunk-sid <trunk_sid>
         
         # Generate summary
         total_tests = len(self.test_results)
@@ -322,8 +610,11 @@ def main():
     
     parser = argparse.ArgumentParser(description="Test Exotel vSIP APIs")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logging")
-    parser.add_argument("--test", "-t", choices=["create", "map", "whitelist", "destination", "alias", "all"], 
+    parser.add_argument("--test", "-t", choices=["create", "map", "whitelist", "destination", "alias", 
+                                                "get_destinations", "get_ips", "get_credentials", "get_phones", 
+                                                "delete", "all"], 
                        default="all", help="Run specific test")
+    parser.add_argument("--trunk-sid", help="Trunk SID for GET/DELETE operations")
     
     args = parser.parse_args()
     
@@ -346,6 +637,23 @@ def main():
                 tester.test_add_destination(transport)
         elif args.test == "alias":
             tester.test_set_trunk_alias()
+        elif args.test == "get_destinations":
+            tester.test_get_destination_uris(args.trunk_sid)
+        elif args.test == "get_ips":
+            tester.test_get_whitelisted_ips(args.trunk_sid)
+        elif args.test == "get_credentials":
+            tester.test_get_credentials(args.trunk_sid)
+        elif args.test == "get_phones":
+            tester.test_get_phone_numbers(args.trunk_sid)
+        elif args.test == "delete":
+            if args.trunk_sid:
+                confirm = input(f"⚠️ WARNING: This will permanently delete trunk {args.trunk_sid}. Type 'DELETE' to confirm: ")
+                if confirm == "DELETE":
+                    tester.test_delete_trunk(args.trunk_sid)
+                else:
+                    print("❌ Delete cancelled")
+            else:
+                print("❌ --trunk-sid required for delete operation")
 
 if __name__ == "__main__":
     main() 

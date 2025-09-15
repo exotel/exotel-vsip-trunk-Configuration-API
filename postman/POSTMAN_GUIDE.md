@@ -6,12 +6,13 @@ This Postman collection provides a complete set of requests for testing all Exot
 
 ## ✨ **Features**
 
-- **🔧 Complete API Coverage**: All 5 core vSIP operations
+- **🔧 Complete API Coverage**: All 10 vSIP operations (5 POST, 4 GET, 1 DELETE)
 - **🔐 Automatic Authentication**: Basic Auth configured at collection level
 - **🌍 Environment Variables**: Easy configuration management
 - **✅ Response Tests**: Automatic validation of API responses
 - **📝 Auto-Population**: Trunk SID automatically saved for subsequent requests
 - **📚 Rich Documentation**: Detailed descriptions for each endpoint
+- **🔄 Full CRUD Support**: Create, Read, and Delete operations
 
 ---
 
@@ -60,6 +61,8 @@ This Postman collection provides a complete set of requests for testing all Exot
 
 ## 📋 **API Operations**
 
+### **CREATE Operations (POST)**
+
 ### **1. Trunk Creation** 
 - **Purpose**: Creates a new SIP trunk
 - **Auto-saves**: `TRUNK_SID` for subsequent requests
@@ -91,6 +94,36 @@ This Postman collection provides a complete set of requests for testing all Exot
 - **Purpose**: Sets optional trunk external alias
 - **Required**: `EXOPHONE` (virtual number)
 
+### **READ Operations (GET)**
+
+### **6. Get Destination URIs**
+- **Purpose**: Retrieves all configured destination URIs
+- **Required**: `TRUNK_SID` (auto-populated)
+- **Returns**: Array of destination objects with IDs and URIs
+
+### **7. Get Whitelisted IPs**
+- **Purpose**: Retrieves all whitelisted IP addresses
+- **Required**: `TRUNK_SID` (auto-populated)
+- **Returns**: Array of IP objects with addresses and masks
+
+### **8. Get Credentials**
+- **Purpose**: Retrieves SIP authentication credentials
+- **Required**: `TRUNK_SID` (auto-populated)
+- **Returns**: Username and password for SIP authentication
+
+### **9. Get Phone Numbers**
+- **Purpose**: Retrieves all mapped phone numbers (DIDs)
+- **Required**: `TRUNK_SID` (auto-populated)
+- **Returns**: Array of phone number objects
+
+### **DELETE Operations**
+
+### **10. Delete Trunk** ⚠️
+- **Purpose**: **PERMANENTLY** deletes the trunk and all configurations
+- **Required**: `TRUNK_SID` (auto-populated)
+- **Warning**: This operation is irreversible!
+- **Auto-clears**: `TRUNK_SID` from environment after deletion
+
 ---
 
 ## 🔧 **Environment Variables Reference**
@@ -119,12 +152,27 @@ This Postman collection provides a complete set of requests for testing all Exot
 ## 🧪 **Testing Workflow**
 
 ### **Complete Workflow Test**
+
+#### **Setup Workflow (CREATE)**
 ```
 1. Create Trunk → Gets TRUNK_SID
 2. Map DID → Associates phone number
 3. Whitelist IP → Allows SIP traffic
 4. Add Destinations → Configures routing (UDP/TCP/TLS)
 5. Set Alias → Optional trunk configuration
+```
+
+#### **Verification Workflow (READ)**
+```
+6. Get Destination URIs → Verify configured destinations
+7. Get Whitelisted IPs → Verify security settings
+8. Get Credentials → Retrieve SIP auth details
+9. Get Phone Numbers → Verify mapped DIDs
+```
+
+#### **Cleanup Workflow (DELETE)**
+```
+10. Delete Trunk → Remove trunk and all configurations ⚠️
 ```
 
 ### **Individual Testing**

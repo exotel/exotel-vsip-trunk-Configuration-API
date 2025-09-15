@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Exotel vSIP Trunk APIs",
-    "description": "Complete collection for Exotel vSIP PSTN Connectivity APIs\n\n🚀 **Features:**\n- All 5 core vSIP operations\n- Automatic Basic Authentication\n- Environment variables for easy configuration\n- Response tests and validation\n- Complete documentation\n\n📋 **Operations Included:**\n1. Trunk Creation\n2. DID Mapping\n3. IP Whitelisting\n4. Destination URIs (UDP/TCP/TLS)\n5. Trunk Settings\n\n🔧 **Setup:**\n1. Import this collection\n2. Import the environment file\n3. Set your Exotel credentials in environment variables\n4. Start testing!\n\n📚 **Documentation:** https://github.com/Saurabhsharma209/exotel-vsip-trunk-Configuration-API",
+    "description": "Complete collection for Exotel vSIP PSTN Connectivity APIs\n\n🚀 **Features:**\n- All 10 vSIP operations (5 POST, 4 GET, 1 DELETE)\n- Automatic Basic Authentication\n- Environment variables for easy configuration\n- Response tests and validation\n- Complete documentation\n\n📋 **Operations Included:**\n**CREATE Operations:**\n1. Trunk Creation\n2. DID Mapping\n3. IP Whitelisting\n4. Destination URIs (UDP/TCP/TLS)\n5. Trunk Settings\n\n**READ Operations:**\n6. Get Destination URIs\n7. Get Whitelisted IPs\n8. Get Credentials\n9. Get Phone Numbers\n\n**DELETE Operations:**\n10. Delete Trunk\n\n🔧 **Setup:**\n1. Import this collection\n2. Import the environment file\n3. Set your Exotel credentials in environment variables\n4. Start testing!\n\n📚 **Documentation:** https://github.com/Saurabhsharma209/exotel-vsip-trunk-Configuration-API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "12345",
     "_collection_link": "https://github.com/Saurabhsharma209/exotel-vsip-trunk-Configuration-API"
@@ -484,6 +484,339 @@
           ]
         },
         "description": "Sets optional trunk configuration settings like external alias.\n\n**Prerequisites:**\n- Trunk must be created first\n\n**Parameters:**\n- `settings`: Array of setting objects\n- `name`: Setting name (e.g., \"trunk_external_alias\")\n- `value`: Setting value (e.g., phone number for alias)\n\n**Response:**\n- Returns setting details with timestamps"
+      }
+    },
+    {
+      "name": "6. Get Destination URIs",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test response status",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Parse response",
+              "const responseJson = pm.response.json();",
+              "",
+              "// Test successful response",
+              "pm.test(\"Destination URIs retrieved successfully\", function () {",
+              "    pm.expect(responseJson.response.status).to.eql(\"success\");",
+              "});",
+              "",
+              "// Validate destination URIs data",
+              "if (responseJson.response.status === \"success\" && responseJson.response.data) {",
+              "    const destinations = responseJson.response.data;",
+              "    console.log(\"✅ Retrieved \" + destinations.length + \" destination URI(s)\");",
+              "    ",
+              "    pm.test(\"Destination URIs data is valid\", function () {",
+              "        pm.expect(destinations).to.be.an(\"array\");",
+              "        if (destinations.length > 0) {",
+              "            pm.expect(destinations[0]).to.have.property(\"id\");",
+              "            pm.expect(destinations[0]).to.have.property(\"destination\");",
+              "        }",
+              "    });",
+              "} else {",
+              "    console.log(\"❌ Failed to retrieve destination URIs: \" + JSON.stringify(responseJson.response.error_data));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris",
+          "protocol": "https",
+          "host": [
+            "{{EXO_SUBSCRIBIX_DOMAIN}}"
+          ],
+          "path": [
+            "v2",
+            "accounts",
+            "{{EXO_ACCOUNT_SID}}",
+            "trunks",
+            "{{TRUNK_SID}}",
+            "destination-uris"
+          ]
+        },
+        "description": "Retrieves all destination URIs configured for the specified trunk.\n\n**Prerequisites:**\n- Trunk must exist\n- TRUNK_SID must be set in environment variables\n\n**Response:**\n- Returns array of destination URI objects with details like ID, destination, and timestamps"
+      }
+    },
+    {
+      "name": "7. Get Whitelisted IPs",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test response status",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Parse response",
+              "const responseJson = pm.response.json();",
+              "",
+              "// Test successful response",
+              "pm.test(\"Whitelisted IPs retrieved successfully\", function () {",
+              "    pm.expect(responseJson.response.status).to.eql(\"success\");",
+              "});",
+              "",
+              "// Validate whitelisted IPs data",
+              "if (responseJson.response.status === \"success\" && responseJson.response.data) {",
+              "    const whitelistedIps = responseJson.response.data;",
+              "    console.log(\"✅ Retrieved \" + whitelistedIps.length + \" whitelisted IP(s)\");",
+              "    ",
+              "    pm.test(\"Whitelisted IPs data is valid\", function () {",
+              "        pm.expect(whitelistedIps).to.be.an(\"array\");",
+              "        if (whitelistedIps.length > 0) {",
+              "            pm.expect(whitelistedIps[0]).to.have.property(\"id\");",
+              "            pm.expect(whitelistedIps[0]).to.have.property(\"ip\");",
+              "            pm.expect(whitelistedIps[0]).to.have.property(\"mask\");",
+              "        }",
+              "    });",
+              "} else {",
+              "    console.log(\"❌ Failed to retrieve whitelisted IPs: \" + JSON.stringify(responseJson.response.error_data));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/whitelisted-ips",
+          "protocol": "https",
+          "host": [
+            "{{EXO_SUBSCRIBIX_DOMAIN}}"
+          ],
+          "path": [
+            "v2",
+            "accounts",
+            "{{EXO_ACCOUNT_SID}}",
+            "trunks",
+            "{{TRUNK_SID}}",
+            "whitelisted-ips"
+          ]
+        },
+        "description": "Retrieves all whitelisted IP addresses for the specified trunk.\n\n**Prerequisites:**\n- Trunk must exist\n- TRUNK_SID must be set in environment variables\n\n**Response:**\n- Returns array of whitelisted IP objects with details like ID, IP address, mask, and timestamps"
+      }
+    },
+    {
+      "name": "8. Get Credentials",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test response status",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Parse response",
+              "const responseJson = pm.response.json();",
+              "",
+              "// Test successful response",
+              "pm.test(\"Credentials retrieved successfully\", function () {",
+              "    pm.expect(responseJson.response.status).to.eql(\"success\");",
+              "});",
+              "",
+              "// Validate credentials data",
+              "if (responseJson.response.status === \"success\" && responseJson.response.data) {",
+              "    const credentials = responseJson.response.data;",
+              "    console.log(\"✅ Retrieved trunk credentials\");",
+              "    ",
+              "    pm.test(\"Credentials data is valid\", function () {",
+              "        pm.expect(credentials).to.be.an(\"object\");",
+              "        pm.expect(credentials).to.have.property(\"username\");",
+              "        pm.expect(credentials).to.have.property(\"password\");",
+              "    });",
+              "} else {",
+              "    console.log(\"❌ Failed to retrieve credentials: \" + JSON.stringify(responseJson.response.error_data));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/credentials",
+          "protocol": "https",
+          "host": [
+            "{{EXO_SUBSCRIBIX_DOMAIN}}"
+          ],
+          "path": [
+            "v2",
+            "accounts",
+            "{{EXO_ACCOUNT_SID}}",
+            "trunks",
+            "{{TRUNK_SID}}",
+            "credentials"
+          ]
+        },
+        "description": "Retrieves authentication credentials for the specified trunk.\n\n**Prerequisites:**\n- Trunk must exist\n- TRUNK_SID must be set in environment variables\n\n**Response:**\n- Returns credentials object with username and password for SIP authentication"
+      }
+    },
+    {
+      "name": "9. Get Phone Numbers",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test response status",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Parse response",
+              "const responseJson = pm.response.json();",
+              "",
+              "// Test successful response",
+              "pm.test(\"Phone numbers retrieved successfully\", function () {",
+              "    pm.expect(responseJson.response.status).to.eql(\"success\");",
+              "});",
+              "",
+              "// Validate phone numbers data",
+              "if (responseJson.response.status === \"success\" && responseJson.response.data) {",
+              "    const phoneNumbers = responseJson.response.data;",
+              "    console.log(\"✅ Retrieved \" + phoneNumbers.length + \" phone number(s)\");",
+              "    ",
+              "    pm.test(\"Phone numbers data is valid\", function () {",
+              "        pm.expect(phoneNumbers).to.be.an(\"array\");",
+              "        if (phoneNumbers.length > 0) {",
+              "            pm.expect(phoneNumbers[0]).to.have.property(\"id\");",
+              "            pm.expect(phoneNumbers[0]).to.have.property(\"phone_number\");",
+              "        }",
+              "    });",
+              "} else {",
+              "    console.log(\"❌ Failed to retrieve phone numbers: \" + JSON.stringify(responseJson.response.error_data));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/phone-numbers",
+          "protocol": "https",
+          "host": [
+            "{{EXO_SUBSCRIBIX_DOMAIN}}"
+          ],
+          "path": [
+            "v2",
+            "accounts",
+            "{{EXO_ACCOUNT_SID}}",
+            "trunks",
+            "{{TRUNK_SID}}",
+            "phone-numbers"
+          ]
+        },
+        "description": "Retrieves all phone numbers (DIDs) mapped to the specified trunk.\n\n**Prerequisites:**\n- Trunk must exist\n- TRUNK_SID must be set in environment variables\n\n**Response:**\n- Returns array of phone number objects with details like ID, phone number, and timestamps"
+      }
+    },
+    {
+      "name": "10. Delete Trunk",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test response status",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Parse response",
+              "const responseJson = pm.response.json();",
+              "",
+              "// Test successful response",
+              "pm.test(\"Trunk deleted successfully\", function () {",
+              "    pm.expect(responseJson.response.status).to.eql(\"success\");",
+              "});",
+              "",
+              "// Validate deletion response",
+              "if (responseJson.response.status === \"success\") {",
+              "    console.log(\"✅ Trunk deleted successfully\");",
+              "    ",
+              "    pm.test(\"Deletion response is valid\", function () {",
+              "        pm.expect(responseJson.response).to.have.property(\"status\");",
+              "        pm.expect(responseJson.response.status).to.eql(\"success\");",
+              "    });",
+              "    ",
+              "    // Clear the TRUNK_SID from environment since trunk is deleted",
+              "    pm.environment.unset(\"TRUNK_SID\");",
+              "    console.log(\"🗑️ TRUNK_SID cleared from environment\");",
+              "} else {",
+              "    console.log(\"❌ Failed to delete trunk: \" + JSON.stringify(responseJson.response.error_data));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks?trunk_sid={{TRUNK_SID}}",
+          "protocol": "https",
+          "host": [
+            "{{EXO_SUBSCRIBIX_DOMAIN}}"
+          ],
+          "path": [
+            "v2",
+            "accounts",
+            "{{EXO_ACCOUNT_SID}}",
+            "trunks"
+          ],
+          "query": [
+            {
+              "key": "trunk_sid",
+              "value": "{{TRUNK_SID}}"
+            }
+          ]
+        },
+        "description": "⚠️ **DESTRUCTIVE OPERATION** ⚠️\n\nPermanently deletes the specified trunk and all its associated configurations.\n\n**Prerequisites:**\n- Trunk must exist\n- TRUNK_SID must be set in environment variables\n\n**⚠️ WARNING:**\n- This operation is irreversible\n- All trunk configurations will be lost\n- All associated phone numbers, IPs, and destinations will be removed\n- Use with extreme caution\n\n**Response:**\n- Returns success confirmation\n- Automatically clears TRUNK_SID from environment variables"
       }
     }
   ],

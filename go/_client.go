@@ -69,6 +69,88 @@ func post(path string, payload interface{}) map[string]interface{} {
     return out
 }
 
+// get makes a GET request to the Exotel API
+func get(path string) map[string]interface{} {
+    req, err := http.NewRequest("GET", base()+path, nil)
+    if err != nil {
+        fmt.Printf("Error creating request: %v\n", err)
+        os.Exit(1)
+    }
+    
+    req.Header.Set("Content-Type", "application/json")
+    
+    resp, err := http.DefaultClient.Do(req)
+    if err != nil {
+        fmt.Printf("Error making request: %v\n", err)
+        os.Exit(1)
+    }
+    defer resp.Body.Close()
+    
+    body, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        fmt.Printf("Error reading response: %v\n", err)
+        os.Exit(1)
+    }
+    
+    if resp.StatusCode >= 400 {
+        fmt.Printf("HTTP Error %d: %s\n", resp.StatusCode, string(body))
+        os.Exit(1)
+    }
+    
+    fmt.Println(string(body))
+    
+    var out map[string]interface{}
+    if err := json.Unmarshal(body, &out); err != nil {
+        fmt.Printf("Error parsing JSON response: %v\n", err)
+        os.Exit(1)
+    }
+    
+    return out
+}
+
+// delete makes a DELETE request to the Exotel API
+func delete(path string) map[string]interface{} {
+    req, err := http.NewRequest("DELETE", base()+path, nil)
+    if err != nil {
+        fmt.Printf("Error creating request: %v\n", err)
+        os.Exit(1)
+    }
+    
+    req.Header.Set("Content-Type", "application/json")
+    
+    resp, err := http.DefaultClient.Do(req)
+    if err != nil {
+        fmt.Printf("Error making request: %v\n", err)
+        os.Exit(1)
+    }
+    defer resp.Body.Close()
+    
+    body, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        fmt.Printf("Error reading response: %v\n", err)
+        os.Exit(1)
+    }
+    
+    if resp.StatusCode >= 400 {
+        fmt.Printf("HTTP Error %d: %s\n", resp.StatusCode, string(body))
+        os.Exit(1)
+    }
+    
+    fmt.Println(string(body))
+    
+    var out map[string]interface{}
+    if len(body) > 0 {
+        if err := json.Unmarshal(body, &out); err != nil {
+            fmt.Printf("Error parsing JSON response: %v\n", err)
+            os.Exit(1)
+        }
+    } else {
+        out = make(map[string]interface{})
+    }
+    
+    return out
+}
+
 // getenvDefault returns the environment variable value or a default
 func getenvDefault(key, defaultValue string) string {
     if value := os.Getenv(key); value != "" {
