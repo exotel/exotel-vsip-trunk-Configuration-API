@@ -45,7 +45,7 @@
    EXOPHONE=+91XXXXXXXXXX
    
    # Your SIP server details
-   TRUNK_DEST_IP=your_sip_server_ip
+   TRUNK_DEST_IP=your_sip_server_ip/FQDN(projid.sip.api.domain.com)
    WHITELIST_IP=your_sip_server_public_ip
    ```
 
@@ -96,8 +96,8 @@
 ### **India Setup**
 ```bash
 EXO_SUBSCRIBIX_DOMAIN=api.in.exotel.com
-DID_NUMBER=+918048636999
-EXOPHONE=+918048636999
+DID_NUMBER=+91804863xxxx
+EXOPHONE=+91804863xxxx
 ```
 
 ### **Singapore Setup**
@@ -105,13 +105,6 @@ EXOPHONE=+918048636999
 EXO_SUBSCRIBIX_DOMAIN=api.sg.exotel.com
 DID_NUMBER=+6512345678
 EXOPHONE=+6512345678
-```
-
-### **US Setup**
-```bash
-EXO_SUBSCRIBIX_DOMAIN=api.us.exotel.com
-DID_NUMBER=+14155552671
-EXOPHONE=+14155552671
 ```
 
 ---
