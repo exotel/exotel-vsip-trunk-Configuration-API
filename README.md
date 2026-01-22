@@ -311,45 +311,9 @@ https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/
 
 ## Rate Limits
 
-API requests are rate limited to protect service stability.
-
-| Limit Type | Value | Description |
-|------------|-------|-------------|
-| API Requests | 200 per minute | Maximum API calls per minute per account |
-| Burst Limit | 20 per second | Maximum concurrent requests |
-
-**Rate Limit Headers:**
-
-| Header | Description |
-|--------|-------------|
-| X-RateLimit-Limit | Maximum requests allowed per minute |
-| X-RateLimit-Remaining | Requests remaining in current window |
-| X-RateLimit-Reset | Unix timestamp when the rate limit resets |
-
-**Rate Limit Exceeded Response (HTTP 429):**
-
-```json
-{
-  "request_id": "rate-limit-exceeded-12345",
-  "method": "POST",
-  "http_code": 429,
-  "response": {
-    "status": "failure",
-    "code": 429,
-    "error_data": {
-      "code": 1030,
-      "message": "Rate limit exceeded",
-      "description": "Too many requests. Maximum 200 requests per minute allowed. Retry after 30 seconds."
-    }
-  }
-}
-```
-
-**Best Practices:**
-- Implement exponential backoff when receiving 429 responses
-- Cache API responses where possible (e.g., Get Credentials)
-- Batch operations when feasible
-- Monitor X-RateLimit-Remaining header to avoid hitting limits
+| Limit | Value |
+|-------|-------|
+| API Requests | 200 calls per minute |
 
 ---
 
