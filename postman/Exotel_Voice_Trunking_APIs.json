@@ -1,12 +1,12 @@
 {
   "info": {
     "name": "Exotel Voice Trunking APIs",
-    "description": "Connect your communication system to the telephone network using Exotel's Voice Trunking service.\n\n## Setup\n1. Go to **Authorization** tab → Select **Basic Auth**\n2. Enter your API Key as Username\n3. Enter your API Token as Password\n4. Update `subdomain` and `your_sid` in the URL\n5. Fill form-data parameters in Body tab\n\n## Use Cases\n**Outbound (SIP → PSTN):** Create Trunk → Map Phone Number → Whitelist IP (Static IP required)\n**Inbound (PSTN → SIP):** Create Trunk → Map Phone Number → Add Destination URI (IP or FQDN supported)",
+    "description": "Connect your communication system to the telephone network using Exotel's Voice Trunking service.\n\n## Setup\n1. Go to **Authorization** tab → Select **Basic Auth**\n2. Enter your API Key as Username\n3. Enter your API Token as Password\n4. Update `subdomain` and `your_sid` in the URL\n5. Fill form-data parameters in Body tab\n\n## Use Cases\n**Outbound / Termination (SIP → PSTN):** Create Trunk → Map Phone Number → Whitelist IP (Static IP required)\n**Inbound / Origination (PSTN → SIP):** Create Trunk → Map Phone Number → Add Destination URI (IP or FQDN supported)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "OUTBOUND (SIP → PSTN)",
+      "name": "OUTBOUND / TERMINATION (SIP → PSTN)",
       "item": [
         {
           "name": "1. Create Trunk",
@@ -104,7 +104,7 @@
       ]
     },
     {
-      "name": "INBOUND (PSTN → SIP)",
+      "name": "INBOUND / ORIGINATION (PSTN → SIP)",
       "item": [
         {
           "name": "1. Create Trunk",
