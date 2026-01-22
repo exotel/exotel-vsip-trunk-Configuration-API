@@ -150,31 +150,137 @@ External callers dial your phone number, and the call is routed to your system.
 
 ## Outbound / Termination Setup
 
+Complete these steps to make outbound calls from your system to the PSTN.
+
 ### Step 1: Create Trunk
+
+```bash
+curl -X POST "https://<your_api_key>:<your_api_token>@api.in.exotel.com/v2/accounts/<your_sid>/trunks" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "trunk_name": "outbound_trunk",
+    "nso_code": "ANY-ANY",
+    "domain_name": "<your_sid>.pstn.exotel.com"
+  }'
+```
+
+Save the `trunk_sid` from the response. You will need it for all subsequent API calls.
 
 ### Step 2: Map Phone Number
 
+```bash
+curl -X POST "https://<your_api_key>:<your_api_token>@api.in.exotel.com/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone_number": "+919876543210"
+  }'
+```
+
+Replace `+919876543210` with your ExoPhone number. This becomes your outbound Caller ID.
+
 ### Step 3: Whitelist IP
 
-### Step 4: Get Credentials and Configure PBX
+```bash
+curl -X POST "https://<your_api_key>:<your_api_token>@api.in.exotel.com/v2/accounts/<your_sid>/trunks/<trunk_sid>/whitelisted-ips" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "ip": "203.0.113.50",
+    "mask": 32
+  }'
+```
+
+Replace `203.0.113.50` with your PBX/SBC public IP address.
+
+### Step 4: Get Credentials
+
+```bash
+curl -X GET "https://<your_api_key>:<your_api_token>@api.in.exotel.com/v2/accounts/<your_sid>/trunks/<trunk_sid>/credentials" \
+  -H "Content-Type: application/json"
+```
+
+### Step 5: Configure Your PBX
+
+Use the credentials from Step 4 to configure your PBX:
 
 | PBX Setting | Value |
 |-------------|-------|
 | SIP Server | `<your_sid>.pstn.exotel.com` |
 | Port | 5060 (TCP) or 5061 (TLS) |
-| Username | Value of `trunk_sid` from Create Trunk response |
-| Password | Value from Get Credentials API |
-| Caller ID | Your mapped phone number |
+| Username | Value of `trunk_sid` from Step 1 |
+| Password | Value of `password` from Step 4 |
+| Caller ID | Your mapped phone number from Step 2 |
+
+### Step 6: Make a Test Call
+
+From your PBX, dial any valid phone number. The call should connect through Exotel to the PSTN.
 
 ---
 
 ## Inbound / Origination Setup
 
+Complete these steps to receive inbound calls from the PSTN to your system.
+
 ### Step 1: Create Trunk
+
+```bash
+curl -X POST "https://<your_api_key>:<your_api_token>@api.in.exotel.com/v2/accounts/<your_sid>/trunks" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "trunk_name": "inbound_trunk",
+    "nso_code": "ANY-ANY",
+    "domain_name": "<your_sid>.pstn.exotel.com"
+  }'
+```
+
+Save the `trunk_sid` from the response.
 
 ### Step 2: Map Phone Number
 
+```bash
+curl -X POST "https://<your_api_key>:<your_api_token>@api.in.exotel.com/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone_number": "+911800123456"
+  }'
+```
+
+Replace `+911800123456` with your customer-facing ExoPhone number.
+
 ### Step 3: Add Destination URI
+
+Using IP address:
+
+```bash
+curl -X POST "https://<your_api_key>:<your_api_token>@api.in.exotel.com/v2/accounts/<your_sid>/trunks/<trunk_sid>/destination-uris" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "destinations": [
+      {
+        "destination": "203.0.113.50:5061;transport=tls"
+      }
+    ]
+  }'
+```
+
+Using FQDN (recommended for cloud/HA):
+
+```bash
+curl -X POST "https://<your_api_key>:<your_api_token>@api.in.exotel.com/v2/accounts/<your_sid>/trunks/<trunk_sid>/destination-uris" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "destinations": [
+      {
+        "destination": "sip.yourcompany.com:5061;transport=tls"
+      }
+    ]
+  }'
+```
+
+Replace the IP or FQDN with your SIP server address.
+
+### Step 4: Test Inbound Call
+
+Call your mapped phone number from any phone. The call should route to your SIP server.
 
 ---
 
@@ -200,6 +306,50 @@ https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/
 |--------|-----------|
 | India (Mumbai) | api.in.exotel.com |
 | Singapore | api.exotel.com |
+
+---
+
+## Rate Limits
+
+API requests are rate limited to protect service stability.
+
+| Limit Type | Value | Description |
+|------------|-------|-------------|
+| API Requests | 200 per minute | Maximum API calls per minute per account |
+| Burst Limit | 20 per second | Maximum concurrent requests |
+
+**Rate Limit Headers:**
+
+| Header | Description |
+|--------|-------------|
+| X-RateLimit-Limit | Maximum requests allowed per minute |
+| X-RateLimit-Remaining | Requests remaining in current window |
+| X-RateLimit-Reset | Unix timestamp when the rate limit resets |
+
+**Rate Limit Exceeded Response (HTTP 429):**
+
+```json
+{
+  "request_id": "rate-limit-exceeded-12345",
+  "method": "POST",
+  "http_code": 429,
+  "response": {
+    "status": "failure",
+    "code": 429,
+    "error_data": {
+      "code": 1030,
+      "message": "Rate limit exceeded",
+      "description": "Too many requests. Maximum 200 requests per minute allowed. Retry after 30 seconds."
+    }
+  }
+}
+```
+
+**Best Practices:**
+- Implement exponential backoff when receiving 429 responses
+- Cache API responses where possible (e.g., Get Credentials)
+- Batch operations when feasible
+- Monitor X-RateLimit-Remaining header to avoid hitting limits
 
 ---
 
