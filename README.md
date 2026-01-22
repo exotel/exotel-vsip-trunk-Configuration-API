@@ -1,6 +1,6 @@
-# Exotel vSIP Trunk Configuration API
+# Exotel Voice Trunking APIs
 
-Configure SIP Trunks for PSTN connectivity with Exotel.
+Connect your communication system to the telephone network using Exotel's Voice Trunking service.
 
 ---
 
@@ -671,7 +671,7 @@ curl -X DELETE "https://<your_api_key>:<your_api_token><subdomain>/v2/accounts/<
 
 # Postman Collection
 
-Import `postman/Exotel_vSIP_API_Collection.json` into Postman.
+Import `postman/Exotel_Voice_Trunking_APIs.json` into Postman.
 
 **Setup:**
 1. Go to **Authorization** tab → **Basic Auth**
