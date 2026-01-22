@@ -4,7 +4,175 @@ Connect your communication system to the telephone network using Exotel's Voice 
 
 ---
 
-## What is a SIP Trunk?
+> ⚠️ **Important:** FQDN/DNS routing is supported **only for Inbound calls (PSTN → SIP)**.  
+> Outbound calls (SIP → PSTN) require **static IP whitelisting**.
+
+---
+
+# Call Direction & Connectivity Terminology
+
+**Read this first** — Understanding call direction is critical for successful integration.
+
+This documentation uses **Inbound / Outbound** as the primary terminology because it is the most intuitive for developers.
+
+## TL;DR
+
+| Direction | What It Means | Connectivity Requirement |
+|-----------|---------------|--------------------------|
+| **Outbound** | Calls your system makes to the PSTN | Static IP only |
+| **Inbound** | Calls your system receives from the PSTN | IP or FQDN supported |
+
+---
+
+## Outbound Calls (Your System → PSTN)
+
+```
+┌─────────────────────┐
+│ Your PBX / Bot / SBC│
+└──────────┬──────────┘
+           │
+           │  SIP (from static IP)
+           ▼
+┌─────────────────────┐
+│       Exotel        │
+└──────────┬──────────┘
+           │
+           │  PSTN
+           ▼
+┌─────────────────────┐
+│   Customer Phone    │
+└─────────────────────┘
+```
+
+**What happens:**
+- A call originates from your SIP system (PBX, SBC, bot, contact center)
+- The call is routed to the public telephone network (PSTN) via Exotel
+- Exotel authenticates your system by **source IP**
+
+**Connectivity requirement:**
+| Supported | Not Supported |
+|-----------|---------------|
+| ✅ Static public IP only | ❌ FQDN / DNS |
+| | ❌ SIP REGISTER |
+
+**What you configure:**
+1. Create a trunk
+2. Map your caller ID (ExoPhone / DID)
+3. Whitelist your static public IP
+
+**Typical use cases:**
+- Sales or support calls
+- Click-to-call
+- Bot-initiated outbound campaigns
+- Predictive/progressive dialers
+
+---
+
+## Inbound Calls (PSTN → Your System)
+
+```
+┌─────────────────────┐
+│   Customer Phone    │
+└──────────┬──────────┘
+           │
+           │  PSTN
+           ▼
+┌─────────────────────┐
+│       Exotel        │
+└──────────┬──────────┘
+           │
+           │  SIP (to IP or FQDN)
+           ▼
+┌─────────────────────┐
+│ Your PBX / Bot / SBC│
+└─────────────────────┘
+```
+
+**What happens:**
+- A call originates from the PSTN (customer dials your number)
+- Exotel initiates a SIP INVITE to your SIP system
+- Calls can be routed using static IP **or** DNS-based FQDN
+
+**Connectivity options:**
+| Option | Best For |
+|--------|----------|
+| ✅ Static public IP | Simple, single-server setups |
+| ✅ FQDN / DNS-based routing | Cloud / HA / multi-region setups |
+
+**What you configure:**
+1. Create a trunk
+2. Map the customer-facing phone number (ExoPhone / DID)
+3. Configure destination URI(s):
+   - `<ip>:<port>;transport=tls` or
+   - `<fqdn>:<port>;transport=tls`
+
+**Typical use cases:**
+- Incoming support or sales calls
+- IVR and agent routing
+- SIP-to-Flow or SIP-to-bot integrations
+- Contact center inbound queues
+
+---
+
+## Telco Terminology (For Reference Only)
+
+Some telecom documentation (including other providers and carrier specs) may use the terms **Origination** and **Termination**.
+
+These terms are **perspective-dependent** and often confusing, so they are **not used as primary terms** in this documentation.
+
+| Plain English | Direction | Telco Term |
+|---------------|-----------|------------|
+| **Outbound** | SIP → PSTN | Termination |
+| **Inbound** | PSTN → SIP | Origination |
+
+> 💡 **Always use Inbound / Outbound terminology** when reading or using this repo.
+
+---
+
+## Quick Decision Guide
+
+**Not sure which setup you need?** Ask yourself:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  "Am I making calls TO the PSTN, or receiving calls FROM it?" │
+└─────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┴───────────────┐
+              │                               │
+              ▼                               ▼
+┌─────────────────────────┐     ┌─────────────────────────┐
+│  Making calls TO PSTN   │     │ Receiving calls FROM PSTN│
+│                         │     │                         │
+│  → OUTBOUND setup       │     │  → INBOUND setup        │
+│  → Static IP required   │     │  → IP or FQDN supported │
+└─────────────────────────┘     └─────────────────────────┘
+```
+
+---
+
+## Key Takeaways
+
+| Rule | Details |
+|------|---------|
+| 🔴 Outbound calls | Always require a **static public IP** |
+| 🟢 Inbound calls | Support both **IP and FQDN/DNS** routing |
+| 📖 Terminology | **Inbound / Outbound** is the source of truth |
+| 📚 Telco terms | Origination / Termination are secondary references only |
+
+---
+
+## How This Repo Is Organized
+
+| Section | What It Covers |
+|---------|----------------|
+| **Outbound Setup** | Static IP whitelisting, Caller ID mapping, SIP credentials |
+| **Inbound Setup** | Destination URI configuration, FQDN routing, SIP INVITE handling |
+| **Troubleshooting** | SIP response codes, common issues, validation scripts |
+
+---
+
+# What is a SIP Trunk?
 
 ```
 ┌─────────────────┐         ┌─────────────────┐         ┌─────────────────┐
@@ -20,21 +188,21 @@ A SIP Trunk connects your communication system to the Public Switched Telephone 
 
 ## Two Use Cases
 
-| Use Case | Direction | Setup Flow |
-|----------|-----------|------------|
-| **Termination** | Your System → PSTN | Create Trunk → Map Phone Number → Whitelist IP |
-| **Origination** | PSTN → Your System | Create Trunk → Map Phone Number → Add Destination URI |
+| Use Case | Direction | Connectivity | Setup Flow |
+|----------|-----------|--------------|------------|
+| **Outbound** | Your System → PSTN | Static IP only | Create Trunk → Map Phone Number → Whitelist IP |
+| **Inbound** | PSTN → Your System | IP or FQDN | Create Trunk → Map Phone Number → Add Destination URI |
 
 ```
 ┌─────────────────────────────┐     ┌─────────────────────────────┐
-│      TERMINATION            │     │      ORIGINATION            │
-│    (Outbound Calls)         │     │    (Inbound Calls)          │
+│      OUTBOUND CALLS         │     │      INBOUND CALLS          │
+│    (SIP → PSTN)             │     │    (PSTN → SIP)             │
 ├─────────────────────────────┤     ├─────────────────────────────┤
 │  1. Create Trunk            │     │  1. Create Trunk            │
 │  2. Map Phone Number        │     │  2. Map Phone Number        │
 │     (Your Caller ID)        │     │     (Customer Dials)        │
 │  3. Whitelist IP            │     │  3. Add Destination URI     │
-│     (Your Server IP)        │     │     (Your Server Address)   │
+│     (Static IP Required)    │     │     (IP or FQDN)            │
 └─────────────────────────────┘     └─────────────────────────────┘
 ```
 
@@ -58,13 +226,15 @@ Before you begin, ensure you have:
 
 ---
 
-## Quickstart: Termination (Make Outbound Calls)
+## Quickstart: Outbound Calls (Your System → PSTN)
 
 **Goal:** Make a call from your PBX to a mobile/landline number.
 
+> ⚠️ **Requires static public IP** — FQDN/DNS is not supported for outbound.
+
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│                    TERMINATION SETUP (5 minutes)                         │
+│                    OUTBOUND SETUP (5 minutes)                            │
 └──────────────────────────────────────────────────────────────────────────┘
 
   STEP 1                STEP 2                 STEP 3              STEP 4
@@ -130,13 +300,15 @@ From your PBX, dial any valid phone number. The call should connect!
 
 ---
 
-## Quickstart: Origination (Receive Inbound Calls)
+## Quickstart: Inbound Calls (PSTN → Your System)
 
 **Goal:** Receive calls on your published number and route to your system.
 
+> ✅ **Supports IP or FQDN** — Use FQDN for cloud/HA deployments.
+
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│                    ORIGINATION SETUP (5 minutes)                         │
+│                    INBOUND SETUP (5 minutes)                             │
 └──────────────────────────────────────────────────────────────────────────┘
 
   STEP 1                STEP 2                 STEP 3              STEP 4
@@ -193,27 +365,31 @@ Call your mapped phone number from any phone. The call should route to your serv
 
 ## Checklist Before Making Your First Call
 
-### For Termination (Outbound)
+### For Outbound Calls (Your System → PSTN)
 
 | # | Check | How to Verify |
 |---|-------|---------------|
 | 1 | ✅ Trunk created | `trunk_sid` received in response |
 | 2 | ✅ Phone number mapped | [Get Phone Numbers API](#get-phone-numbers) returns your number |
-| 3 | ✅ IP whitelisted | [Get Whitelisted IPs API](#get-whitelisted-ips) returns your IP |
+| 3 | ✅ **Static IP whitelisted** | [Get Whitelisted IPs API](#get-whitelisted-ips) returns your IP |
 | 4 | ✅ SIP credentials obtained | [Get Credentials API](#get-credentials) returns username/password |
 | 5 | ✅ PBX configured | SIP registration successful |
 | 6 | ✅ Firewall allows outbound | Port 5060/5061 open to Exotel |
 
-### For Origination (Inbound)
+> ⚠️ **Remember:** Outbound requires static IP. FQDN/DNS is not supported.
+
+### For Inbound Calls (PSTN → Your System)
 
 | # | Check | How to Verify |
 |---|-------|---------------|
 | 1 | ✅ Trunk created | `trunk_sid` received in response |
 | 2 | ✅ Phone number mapped | [Get Phone Numbers API](#get-phone-numbers) returns your number |
-| 3 | ✅ Destination URI added | [Get Destination URIs API](#get-destination-uris) returns your server |
+| 3 | ✅ **Destination URI added** | [Get Destination URIs API](#get-destination-uris) returns your server |
 | 4 | ✅ Server listening | Your SIP server accepting connections on 5060/5061 |
 | 5 | ✅ Firewall allows inbound | Port 5060/5061 open from Exotel IPs |
 | 6 | ✅ TLS certificate valid | If using TLS, certificate is trusted |
+
+> ✅ **Tip:** Inbound supports both IP and FQDN. Use FQDN for cloud/HA setups.
 
 ---
 
