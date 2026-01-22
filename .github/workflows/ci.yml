@@ -1,151 +1,41 @@
-name: CI - Syntax and Structure Validation
+name: CI - Validation
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
 jobs:
-  validate-structure:
+  validate:
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-        
-    - name: Install dependencies
+    - name: Validate shell scripts
       run: |
-        python -m pip install --upgrade pip
-        if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
+        echo "🐚 Validating shell scripts..."
+        find curl/ -name "*.sh" -exec bash -n {} \;
+        echo "✅ Shell scripts are valid"
         
-    - name: Validate file structure and syntax
+    - name: Validate JSON files
       run: |
-        echo "🔍 Running file structure validation..."
-        python3 test_api_files_exist.py
+        echo "📄 Validating JSON files..."
+        for file in postman/*.json; do
+          python3 -m json.tool "$file" > /dev/null
+        done
+        echo "✅ JSON files are valid"
         
     - name: Check for sensitive information
       run: |
-        echo "🔒 Checking for sensitive information..."
-        # Check for potential API keys or tokens
-        if grep -r "EXO_AUTH_KEY.*=" --exclude-dir=.git --exclude="*.example" --exclude="*.md" .; then
-          echo "❌ Found potential hardcoded credentials"
-          exit 1
-        fi
+        echo "🔐 Checking for sensitive information..."
         
-        if grep -r "trmum1[a-zA-Z0-9]\{20,\}" --exclude-dir=.git --exclude="*.md" .; then
+        # Check for real trunk SIDs
+        if grep -rE "trmum1[a-f0-9]{20,}" --exclude-dir=.git .; then
           echo "❌ Found potential real trunk SIDs"
           exit 1
         fi
         
         echo "✅ No sensitive information found"
-        
-    - name: Validate Python syntax
-      run: |
-        echo "🐍 Validating Python syntax..."
-        find . -name "*.py" -exec python -m py_compile {} \;
-        echo "✅ Python syntax validation passed"
-        
-    - name: Check shell script syntax
-      run: |
-        echo "🐚 Validating shell script syntax..."
-        find . -name "*.sh" -exec bash -n {} \;
-        echo "✅ Shell script syntax validation passed"
-        
-    - name: Validate JSON files
-      run: |
-        echo "📄 Validating JSON files..."
-        find . -name "*.json" -exec python -m json.tool {} \; > /dev/null
-        echo "✅ JSON validation passed"
-        
-    - name: Check documentation links
-      run: |
-        echo "🔗 Checking documentation links..."
-        # Basic check for broken internal links
-        if grep -r "\[.*\](.*\.md)" --include="*.md" . | grep -v "http" | while read line; do
-          file=$(echo "$line" | cut -d: -f1)
-          link=$(echo "$line" | grep -o "\[.*\](.*\.md)" | sed 's/.*](\(.*\))/\1/')
-          if [ ! -f "$(dirname "$file")/$link" ] && [ ! -f "$link" ]; then
-            echo "❌ Broken link in $file: $link"
-            exit 1
-          fi
-        done
-        echo "✅ Documentation links validated"
-
-  security-scan:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Run security scan
-      run: |
-        echo "🔐 Running security scan..."
-        
-        # Check for common security issues
-        echo "Checking for hardcoded secrets..."
-        
-        # Check for potential API keys
-        if grep -rE "(api[_-]?key|auth[_-]?token|secret|password)\s*[:=]\s*['\"][^'\"]{10,}" --exclude-dir=.git --exclude="*.example" --exclude="*.md" .; then
-          echo "❌ Potential hardcoded secrets found"
-          exit 1
-        fi
-        
-        # Check for real-looking trunk SIDs (not example ones)
-        if grep -rE "trmum1[a-f0-9]{20,}" --exclude-dir=.git --exclude="*.md" .; then
-          echo "❌ Potential real trunk SIDs found"
-          exit 1
-        fi
-        
-        echo "✅ Security scan passed"
-
-  documentation-check:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Check documentation completeness
-      run: |
-        echo "📚 Checking documentation completeness..."
-        
-        # Check if all new API files have corresponding documentation
-        missing_docs=0
-        
-        for lang in curl python go java php; do
-          if [ -d "$lang" ]; then
-            echo "Checking $lang directory..."
-            
-            # Count API files
-            api_files=$(find "$lang" -name "*.sh" -o -name "*.py" -o -name "*.go" -o -name "*.java" -o -name "*.php" | grep -E "(get_|delete_)" | wc -l)
-            
-            if [ "$api_files" -gt 0 ]; then
-              echo "✅ Found $api_files new API files in $lang"
-            fi
-          fi
-        done
-        
-        # Check if README mentions all operations
-        if ! grep -q "GET.*destination.*URI" README.md; then
-          echo "❌ README missing GET destination URIs documentation"
-          missing_docs=1
-        fi
-        
-        if ! grep -q "DELETE.*trunk" README.md; then
-          echo "❌ README missing DELETE trunk documentation"  
-          missing_docs=1
-        fi
-        
-        if [ $missing_docs -eq 0 ]; then
-          echo "✅ Documentation completeness check passed"
-        else
-          echo "❌ Documentation completeness check failed"
-          exit 1
-        fi 

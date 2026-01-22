@@ -1,22 +1,21 @@
 #!/usr/bin/env bash
 
-# Source environment variables
-if [ -f "../.env" ]; then
-    source ../.env
-elif [ -f ".env" ]; then
-    source .env
-fi
+# Create Trunk API
+# Creates a virtual connection between your system and Exotel's PSTN gateway
 
-# Check required environment variables
-if [ -z "$EXO_AUTH_KEY" ] || [ -z "$EXO_AUTH_TOKEN" ] || [ -z "$EXO_SUBSCRIBIX_DOMAIN" ] || [ -z "$EXO_ACCOUNT_SID" ]; then
-    echo "Error: Missing required environment variables. Please check your .env file."
-    exit 1
-fi
+# Load environment variables
+if [ -f "../.env" ]; then source ../.env; elif [ -f ".env" ]; then source .env; fi
 
-curl --location --request POST "https://${EXO_AUTH_KEY}:${EXO_AUTH_TOKEN}@${EXO_SUBSCRIBIX_DOMAIN}/v2/accounts/${EXO_ACCOUNT_SID}/trunks" \
-  --header 'Content-Type: application/json' \
-  --data-raw "{
-  \"trunk_name\": \"${TRUNK_NAME:-my_ai_trunk}\",
-  \"nso_code\": \"${NSO_CODE:-ANY-ANY}\",
-  \"domain_name\": \"${EXO_ACCOUNT_SID}.pstn.exotel.com\"
-}" 
+# Validate required variables
+: "${your_api_key:?Error: your_api_key is required}"
+: "${your_api_token:?Error: your_api_token is required}"
+: "${subdomain:?Error: subdomain is required (e.g., api.in.exotel.com)}"
+: "${your_sid:?Error: your_sid is required}"
+
+curl -X POST "https://${your_api_key}:${your_api_token}@${subdomain}/v2/accounts/${your_sid}/trunks" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"trunk_name\": \"${trunk_name:-my_trunk}\",
+    \"nso_code\": \"${nso_code:-ANY-ANY}\",
+    \"domain_name\": \"${your_sid}.pstn.exotel.com\"
+  }"
