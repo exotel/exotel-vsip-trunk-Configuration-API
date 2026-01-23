@@ -33,9 +33,8 @@ Ready-to-use bash scripts for all SIP Trunking API operations.
 |-------|--------|-------------|
 | 1 | `create_trunk.sh` | Create a new SIP trunk |
 | 2 | `map_did.sh` | Map phone number to trunk |
-| 3 | `whitelist_ip.sh` | Whitelist your server IP (for Outbound) |
-| 4 | `add_destination.sh` | Add destination URI (for Inbound) |
-| 5 | `set_trunk_alias.sh` | Set outbound caller ID (optional) |
+| 3 | `map_acl.sh` | Map ACL to trunk (whitelist IP) - for Outbound |
+| 4 | `map_destination_uri.sh` | Map destination URI to trunk - for Inbound |
 
 ### StreamKit Setup (Voice AI)
 
@@ -48,18 +47,19 @@ For StreamKit, run scripts in this order with `MODE=flow`:
 # Step 2: Map phone number with flow mode
 MODE=flow ./map_did.sh
 
-# Step 3: Whitelist IP
-./whitelist_ip.sh
+# Step 3: Map ACL (whitelist IP)
+./map_acl.sh
 ```
 
-### View & Manage
+### Manage & View
 
 | Script | Description |
 |--------|-------------|
 | `get_phone_numbers.sh` | List mapped phone numbers |
-| `get_whitelisted_ips.sh` | List whitelisted IPs |
+| `get_acls.sh` | List ACLs (whitelisted IPs) |
 | `get_destination_uris.sh` | List destination URIs |
 | `update_phone_number.sh` | Switch mode (pstn ↔ flow) |
+| `set_trunk_alias.sh` | Set outbound caller ID |
 | `delete_trunk.sh` | Delete trunk (⚠️ permanent!) |
 
 ---
@@ -77,11 +77,11 @@ MODE=flow ./map_did.sh
 PHONE_NUMBER="+919876543210" ./map_did.sh
 # → Save PHONE_NUMBER_ID to .env
 
-# 3. Whitelist your server IP
-SERVER_IP="your.server.ip" ./whitelist_ip.sh
+# 3. Map ACL (whitelist your server IP)
+SERVER_IP="your.server.ip" ./map_acl.sh
 
-# 4. Add destination for inbound calls
-DESTINATION="your.server.ip" ./add_destination.sh
+# 4. Map destination URI for inbound calls
+DESTINATION="your.server.ip" ./map_destination_uri.sh
 ```
 
 ### StreamKit Setup (Voice AI)
@@ -94,8 +94,8 @@ DESTINATION="your.server.ip" ./add_destination.sh
 # 2. Map phone number with flow mode
 MODE=flow PHONE_NUMBER="+919876543210" ./map_did.sh
 
-# 3. Whitelist your server IP
-SERVER_IP="your.server.ip" ./whitelist_ip.sh
+# 3. Map ACL (whitelist your server IP)
+SERVER_IP="your.server.ip" ./map_acl.sh
 ```
 
 ### Switch Mode (pstn ↔ flow)
@@ -117,11 +117,12 @@ MODE=pstn ./update_phone_number.sh
 | `API_KEY` | Yes | API Key from Exotel Dashboard |
 | `API_TOKEN` | Yes | API Token from Exotel Dashboard |
 | `ACCOUNT_SID` | Yes | Account SID from Exotel Dashboard |
+| `SUBDOMAIN` | No | API subdomain (default: api.in.exotel.com) |
 | `TRUNK_SID` | After create_trunk | Trunk SID from create response |
 | `PHONE_NUMBER` | For map_did | Phone number in E.164 format |
 | `PHONE_NUMBER_ID` | For update_phone_number | Numeric ID from map response |
-| `SERVER_IP` | For whitelist_ip | Your server's public IP |
-| `DESTINATION` | For add_destination | IP or FQDN for inbound routing |
+| `SERVER_IP` | For map_acl | Your server's public IP |
+| `DESTINATION` | For map_destination_uri | IP or FQDN for inbound routing |
 | `MODE` | Optional | `pstn` (default) or `flow` |
 
 ---
@@ -129,6 +130,6 @@ MODE=pstn ./update_phone_number.sh
 ## Notes
 
 - **Order matters**: Run scripts in the order shown above
-- **Whitelist first**: For IP destinations, whitelist the IP before adding as destination
-- **FQDNs**: Don't need whitelisting for destination URIs
+- **Map ACL first**: For IP destinations, map ACL before mapping as destination URI
+- **FQDNs**: Don't need ACL mapping for destination URIs
 - **Phone Number ID**: The numeric ID (e.g., `41523`) from map_did response, NOT the phone number itself

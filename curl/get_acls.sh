@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ============================================================================
-# GET WHITELISTED IPs
+# GET ACLs (Whitelisted IPs)
 # Lists all whitelisted IP addresses for the trunk
 # ============================================================================
 

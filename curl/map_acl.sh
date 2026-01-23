@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 # ============================================================================
-# WHITELIST IP ADDRESS
+# MAP ACL TO TRUNK (Whitelist IP)
 # Registers your server's public IP for authentication
 # Required for: Outbound/Termination calls
-# Note: Must whitelist IP BEFORE adding as destination URI
+# Note: Must whitelist IP BEFORE adding it as destination URI
 # ============================================================================
 
 # Load environment variables
@@ -21,7 +21,7 @@ if [ -f "../.env" ]; then source ../.env; elif [ -f ".env" ]; then source .env; 
 SUBDOMAIN="${SUBDOMAIN:-api.in.exotel.com}"
 MASK="${MASK:-32}"  # 32 = single IP, 24 = /24 subnet
 
-echo "Whitelisting IP: ${SERVER_IP}/${MASK}"
+echo "Mapping ACL (Whitelisting IP): ${SERVER_IP}/${MASK}"
 
 curl -X POST "https://${API_KEY}:${API_TOKEN}@${SUBDOMAIN}/v2/accounts/${ACCOUNT_SID}/trunks/${TRUNK_SID}/whitelisted-ips" \
   -H "Content-Type: application/json" \

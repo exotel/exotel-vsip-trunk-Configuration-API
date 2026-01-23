@@ -1,71 +1,108 @@
 # Exotel SIP Trunking APIs - API Reference
 
-Complete API documentation with request/response examples.
-
----
-
-## Sample Data Used in Examples
-
-| Parameter | Example Value | Description |
-|-----------|---------------|-------------|
-| Account SID | `exoteltest` | Your Exotel account identifier |
-| API Key | `exoteltest` | Your API key (usually same as SID) |
-| API Token | `a1b2c3d4e5f6g7h8i9j0` | Your API token |
-| Trunk SID | `trmum1a2b3c4d5e6f7890123456` | Trunk identifier (returned on creation) |
-| Server IP | `203.0.113.50` | Your PBX/SBC public IP |
-| Server Port | `5061` | SIP TLS port |
-| Phone Number | `+919876543210` | E.164 format phone number |
+SIP Trunking APIs enable you to connect your PBX, Contact Center, or Voice AI system to the telephone network (PSTN) via Exotel's infrastructure.
 
 ---
 
 ## Authentication
 
-All API requests require HTTP Basic Authentication.
+All API requests require HTTP Basic Authentication using your API credentials.
+
+### Getting Your Credentials
+
+1. Login to your Exotel Dashboard
+2. Navigate to **API Credentials** section
+3. Copy the following details:
+   - **API Key** (username)
+   - **API Token** (password)
+   - **Account SID**
+
+### Making Authenticated Requests
+
+An HTTP request is made with Basic Authentication:
 
 ```
-Authorization: Basic base64(api_key:api_token)
+Authorization: Basic base64(<your_api_key>:<your_api_token>)
 ```
 
-**Base URL:**
-- India: `https://api.in.exotel.com`
-- Singapore: `https://api.exotel.com`
+Or include credentials in the URL:
 
-**Rate Limit:** 200 calls per minute
+```
+https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/...
+```
+
+Replace the following placeholders:
+- `<your_api_key>` and `<your_api_token>` with the API key and token from your dashboard
+- `<your_sid>` with your Account SID
+- `<subdomain>` with the region of your account:
+  - **Singapore cluster**: `api.exotel.com`
+  - **Mumbai cluster**: `api.in.exotel.com`
+
+### Rate Limits
+
+| Limit Type | Value |
+|------------|-------|
+| Requests per minute | 200 |
+| Concurrent connections | 50 |
 
 ---
 
-# API Endpoints
+# GETTING STARTED (PSTN Setup)
+
+This section covers the APIs required to set up SIP Trunking for standard PSTN (telephone network) connectivity.
+
+**Setup Flow:**
+1. Create Trunk → 2. Map Phone Number → 3. Map ACL (for Outbound) → 4. Map Destination URI (for Inbound)
+
+---
 
 ## 1. Create Trunk
 
-Creates a new SIP trunk for voice connectivity.
+Creates a new SIP trunk. This is the first step for all SIP Trunking use cases.
 
-**Endpoint:**
+A SIP Trunk acts as a virtual connection between your communication system (PBX/Contact Center) and Exotel's telephony network.
+
+### HTTP Request
+
 ```
-POST /v2/accounts/{account_sid}/trunks
+POST https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks
 ```
+
+### Request Headers
+
+| Header | Value |
+|--------|-------|
+| Content-Type | application/json |
 
 ### Request Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| trunk_name | String | Yes | Unique name (max 16 chars, alphanumeric + underscore) |
-| nso_code | String | Yes | Network service operator code. Use `ANY-ANY` |
-| domain_name | String | Yes | SIP domain. Format: `{account_sid}.pstn.exotel.com` |
+The following parameters are sent as JSON in the body of the request:
+
+| Parameter Name | Mandatory/Optional | Value |
+|----------------|-------------------|-------|
+| trunk_name | Mandatory | String; Unique identifier for the trunk. Must be alphanumeric with underscores only, maximum 16 characters. Example: `outbound_trunk`, `my_pbx_trunk` |
+| nso_code | Mandatory | String; Network Service Operator code. Use `ANY-ANY` for standard configuration. |
+| domain_name | Mandatory | String; SIP domain for the trunk. Format: `<your_sid>.pstn.exotel.com`. Example: `ameyo5m.pstn.exotel.com` |
 
 ### Example Request
 
 ```bash
-curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks" \
+curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks" \
   -H "Content-Type: application/json" \
   -d '{
     "trunk_name": "outbound_trunk",
     "nso_code": "ANY-ANY",
-    "domain_name": "exoteltest.pstn.exotel.com"
+    "domain_name": "<your_sid>.pstn.exotel.com"
   }'
 ```
 
-### Success Response (200 OK)
+### HTTP Response
+
+On success, the HTTP response status code will be `200 OK`.
+
+The `trunk_sid` is the unique identifier of the trunk - **save this value** as it will be required for all subsequent API calls.
+
+### Example Response
 
 ```json
 {
@@ -82,112 +119,125 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
       "date_updated": "2026-01-23T09:24:59Z",
       "trunk_sid": "trmum1f708622631150902801a1n",
       "status": "active",
-      "domain_name": "exoteltest.pstn.exotel.com",
+      "domain_name": "ameyo5m.pstn.exotel.com",
       "auth_type": "IP-WHITELIST",
       "registration_enabled": "disabled",
       "edge_preference": "auto",
       "nso_code": "ANY-ANY",
       "secure_trunking": "disabled",
-      "destination_uris": "/v2/accounts/exoteltest/trunks/trmum1f708622631150902801a1n/destination-uris",
-      "whitelisted_ips": "/v2/accounts/exoteltest/trunks/trmum1f708622631150902801a1n/whitelisted-ips",
-      "credentials": "/v2/accounts/exoteltest/trunks/trmum1f708622631150902801a1n/credentials",
-      "phone_numbers": "/v2/accounts/exoteltest/trunks/trmum1f708622631150902801a1n/phone-numbers"
+      "destination_uris": "/v2/accounts/ameyo5m/trunks/trmum1f708622631150902801a1n/destination-uris",
+      "whitelisted_ips": "/v2/accounts/ameyo5m/trunks/trmum1f708622631150902801a1n/whitelisted-ips",
+      "credentials": "/v2/accounts/ameyo5m/trunks/trmum1f708622631150902801a1n/credentials",
+      "phone_numbers": "/v2/accounts/ameyo5m/trunks/trmum1f708622631150902801a1n/phone-numbers"
     }
   }
 }
 ```
 
-### Response Fields
+### Response Parameters
 
-| Field | Type | Description |
-|-------|------|-------------|
-| trunk_sid | String | Unique trunk identifier |
-| trunk_name | String | Name of the trunk |
-| domain_name | String | SIP domain for the trunk |
-| status | String | Trunk status (`active`, `inactive`) |
-| auth_type | String | Authentication type (`IP-WHITELIST`) |
-| registration_enabled | String | Registration status (`enabled`, `disabled`) |
-| edge_preference | String | Edge server preference (`auto`) |
-| nso_code | String | Network service operator code |
-| secure_trunking | String | Secure trunking status (`enabled`, `disabled`) |
-| destination_uris | String | API path to destination URIs |
-| whitelisted_ips | String | API path to whitelisted IPs |
-| credentials | String | API path to credentials |
-| phone_numbers | String | API path to phone numbers |
-| date_created | String | ISO 8601 timestamp |
-| date_updated | String | ISO 8601 timestamp |
+| Parameter Name | Type & Value |
+|----------------|--------------|
+| request_id | String; Unique identifier for this API request |
+| method | String; HTTP method used (`POST`) |
+| http_code | Integer; HTTP status code (`200` for success) |
+| trunk_sid | String; **Important** - Unique identifier for the trunk. Save this for subsequent API calls. Example: `trmum1f708622631150902801a1n` |
+| trunk_name | String; Name of the trunk as provided in request |
+| domain_name | String; SIP domain for the trunk |
+| status | String; Current trunk status: `active` - Trunk is ready for use, `inactive` - Trunk is disabled |
+| auth_type | String; Authentication type. Currently only `IP-WHITELIST` is supported |
+| registration_enabled | String; SIP registration status: `enabled` or `disabled` |
+| edge_preference | String; Edge server preference. Default: `auto` |
+| nso_code | String; Network Service Operator code |
+| secure_trunking | String; TLS status: `enabled` or `disabled` |
+| destination_uris | String; API path to manage destination URIs for this trunk |
+| whitelisted_ips | String; API path to manage ACLs (whitelisted IPs) for this trunk |
+| credentials | String; API path to credentials for this trunk |
+| phone_numbers | String; API path to manage phone numbers for this trunk |
+| date_created | String; ISO 8601 timestamp when trunk was created |
+| date_updated | String; ISO 8601 timestamp when trunk was last updated |
 
-### Error Response (400 Bad Request)
+### Error Responses
+
+#### 400 Bad Request - Invalid trunk_name
 
 ```json
 {
-  "request_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "request_id": "a1b2c3d4e5f6",
   "method": "POST",
   "http_code": 400,
   "response": {
-    "status": "failure",
     "code": 400,
     "error_data": {
-      "code": 1000,
-      "message": "Invalid request",
+      "code": 1002,
+      "message": "Invalid parameter",
       "description": "trunk_name must be alphanumeric with underscores only, max 16 characters"
-    }
+    },
+    "status": "failure",
+    "data": null
   }
 }
 ```
 
-### Error Response (409 Conflict)
+#### 409 Conflict - Duplicate trunk_name
 
 ```json
 {
-  "request_id": "b2c3d4e5-f6a7-8901-bcde-f23456789012",
+  "request_id": "b2c3d4e5f6a7",
   "method": "POST",
   "http_code": 409,
   "response": {
-    "status": "failure",
     "code": 409,
     "error_data": {
-      "code": 1002,
-      "message": "Resource exists",
+      "code": 1008,
+      "message": "Duplicate resource",
       "description": "Trunk with name 'outbound_trunk' already exists"
-    }
+    },
+    "status": "failure",
+    "data": null
   }
 }
 ```
 
 ---
 
-## 2. Map Phone Number
+## 2. Map Phone Number to Trunk
 
-Associates a phone number with a trunk. Use `mode` to control routing.
+Associates a phone number (DID/ExoPhone) with the trunk. This phone number will be used for making and receiving calls through the trunk.
 
-**Endpoint:**
+### HTTP Request
+
 ```
-POST /v2/accounts/{account_sid}/trunks/{trunk_sid}/phone-numbers
+POST https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers
 ```
+
+### Request Headers
+
+| Header | Value |
+|--------|-------|
+| Content-Type | application/json |
 
 ### Request Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| phone_number | String | Yes | Phone number in E.164 format (with + prefix) |
-| mode | String | No | `pstn` (default) for PSTN routing, `flow` for StreamKit/Voice AI |
+| Parameter Name | Mandatory/Optional | Value |
+|----------------|-------------------|-------|
+| phone_number | Mandatory | String; The phone number to map to the trunk. Must be in E.164 format (with country code). Example: `+919876543210`, `+912247790597` |
+| mode | Optional | String; Routing mode for the phone number. Can be: `pstn` (default) - Routes calls to telephone network, `flow` - Routes calls to Voice AI bot (StreamKit). If not specified, defaults to `null` and behaves as `pstn`. |
 
-### Example Request (PSTN Mode - Outbound/Termination)
+### Example Request
 
 ```bash
-curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/phone-numbers" \
+curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers" \
   -H "Content-Type: application/json" \
   -d '{
-    "phone_number": "+919876543210",
-    "mode": "pstn"
+    "phone_number": "+919876543210"
   }'
 ```
 
-### Example Request (Flow Mode - StreamKit)
+**For StreamKit (Voice AI) mode:**
 
 ```bash
-curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/phone-numbers" \
+curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers" \
   -H "Content-Type: application/json" \
   -d '{
     "phone_number": "+919876543210",
@@ -195,7 +245,13 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
   }'
 ```
 
-### Success Response (200 OK)
+### HTTP Response
+
+On success, the HTTP response status code will be `200 OK`.
+
+**Important:** Save the `id` from the response - this numeric ID is required for the Update Phone Number Mode API.
+
+### Example Response
 
 ```json
 {
@@ -209,7 +265,7 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
     "data": {
       "id": "41512",
       "phone_number": "+919876543210",
-      "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
+      "trunk_sid": "trmum1f708622631150902801a1n",
       "date_created": "2026-01-23T10:26:54Z",
       "date_updated": "2026-01-23T10:26:54Z",
       "mode": null
@@ -218,56 +274,40 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
 }
 ```
 
-### Response Fields
+### Response Parameters
 
-| Field | Type | Description |
-|-------|------|-------------|
-| id | String | Unique phone number mapping identifier |
-| phone_number | String | Phone number in E.164 format |
-| trunk_sid | String | Associated trunk identifier |
-| mode | String | Routing mode (`pstn`, `flow`, or `null` if not specified) |
-| date_created | String | ISO 8601 timestamp |
-| date_updated | String | ISO 8601 timestamp |
+| Parameter Name | Type & Value |
+|----------------|--------------|
+| id | String; **Important** - Numeric identifier for this phone number mapping. Save this value - required for Update Phone Number Mode API. Example: `41512` |
+| phone_number | String; The mapped phone number in E.164 format |
+| trunk_sid | String; The trunk this phone number is associated with |
+| mode | String or null; Routing mode: `pstn` - PSTN routing, `flow` - StreamKit/Voice AI routing, `null` - Default (same as pstn) |
+| date_created | String; ISO 8601 timestamp when mapping was created |
+| date_updated | String; ISO 8601 timestamp when mapping was last updated |
 
-### Error Response (404 Not Found)
+### Error Responses
+
+#### 404 Not Found - Invalid trunk_sid
 
 ```json
 {
-  "request_id": "d4e5f6a7-b8c9-0123-def4-567890123456",
+  "request_id": "e45544e19a7f4d5d956fefe63fe3c6b6",
   "method": "POST",
   "http_code": 404,
   "response": {
-    "status": "failure",
     "code": 404,
     "error_data": {
-      "code": 1003,
-      "message": "Resource not found",
-      "description": "Trunk 'trmum1a2b3c4d5e6f7890123456' does not exist"
-    }
-  }
-}
-```
-
-### Error Response (400 Bad Request - Invalid Phone)
-
-```json
-{
-  "request_id": "e5f6a7b8-c9d0-1234-ef56-789012345678",
-  "method": "POST",
-  "http_code": 400,
-  "response": {
+      "code": 1000,
+      "message": "Not Found",
+      "description": "Not Found"
+    },
     "status": "failure",
-    "code": 400,
-    "error_data": {
-      "code": 1001,
-      "message": "Invalid parameter",
-      "description": "phone_number must be in E.164 format (e.g., +919876543210)"
-    }
+    "data": null
   }
 }
 ```
 
-### Error Response (409 - Duplicate Phone Number)
+#### 409 Conflict - Phone number already mapped
 
 ```json
 {
@@ -279,7 +319,7 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
     "error_data": {
       "code": 1008,
       "message": "Duplicate resource",
-      "description": "Unable to create DidTrunkMapping with TrunkSid trmum15f77c83605998cdb9d1a1n"
+      "description": "Unable to create DidTrunkMapping with TrunkSid trmum1f708622631150902801a1n"
     },
     "status": "failure",
     "data": null
@@ -287,109 +327,49 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
 }
 ```
 
-> **Note:** This error occurs when the phone number is already mapped to this trunk.
-
 ---
 
-## 3. Update Phone Number Mode
+## 3. Map ACL to Trunk (Whitelist IP)
 
-Switch an existing phone number between PSTN and Flow mode.
+Registers your server's public IP address for authentication. This is required for **Outbound/Termination** calls - allowing your system to send calls through the trunk.
 
-**Endpoint:**
+ACL (Access Control List) ensures only authorized IP addresses can use your trunk for outbound calling.
+
+### HTTP Request
+
 ```
-PUT /v2/accounts/{account_sid}/trunks/{trunk_sid}/phone-numbers/{id}
-```
-
-> **Note:** The `{id}` is the numeric ID returned when you mapped the phone number (e.g., `41523`), NOT the phone number itself.
-
-### Path Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| id | String | Yes | The numeric ID returned from Map Phone Number API (e.g., `41523`) |
-
-### Request Body Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| phone_number | String | Yes | Phone number in E.164 format |
-| mode | String | Yes | `pstn` for PSTN routing, `flow` for StreamKit |
-
-### Example Request (Switch to Flow Mode)
-
-```bash
-curl -X PUT "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/phone-numbers/41523" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "phone_number": "+918040264208",
-    "mode": "flow"
-  }'
+POST https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/whitelisted-ips
 ```
 
-### Example Request (Switch to PSTN Mode)
+### Request Headers
 
-```bash
-curl -X PUT "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/phone-numbers/41523" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "phone_number": "+918040264208",
-    "mode": "pstn"
-  }'
-```
-
-### Success Response (200 OK)
-
-```json
-{
-  "request_id": "c719cd56eb5943e789e1bdbd4ce1515a",
-  "method": "PUT",
-  "http_code": 200,
-  "response": {
-    "code": 200,
-    "error_data": null,
-    "status": "success",
-    "data": {
-      "id": "41523",
-      "phone_number": "+918040264208",
-      "trunk_sid": "trmum15f77c83605998cdb9d1a1n",
-      "date_created": "2026-01-23T13:28:11Z",
-      "date_updated": "2026-01-23T13:41:59Z",
-      "mode": "flow"
-    }
-  }
-}
-```
-
----
-
-## 4. Whitelist IP Address
-
-Register your server's IP for authentication. Required for Outbound/Termination and StreamKit.
-
-**Endpoint:**
-```
-POST /v2/accounts/{account_sid}/trunks/{trunk_sid}/whitelisted-ips
-```
+| Header | Value |
+|--------|-------|
+| Content-Type | application/json |
 
 ### Request Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| ip | String | Yes | Public IPv4 address of your server |
-| mask | Integer | Yes | Subnet mask (32 = single IP, 24 = /24 subnet) |
+| Parameter Name | Mandatory/Optional | Value |
+|----------------|-------------------|-------|
+| ip | Mandatory | String; Your server's public IP address. Must be a valid IPv4 address. Example: `44.248.146.11`, `203.0.113.50` |
+| mask | Optional | Integer; Subnet mask in CIDR notation. Default: `32` (single IP). Use `24` for /24 subnet, `16` for /16 subnet. Example: `32`, `24` |
 
 ### Example Request
 
 ```bash
-curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/whitelisted-ips" \
+curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/whitelisted-ips" \
   -H "Content-Type: application/json" \
   -d '{
-    "ip": "203.0.113.50",
+    "ip": "44.248.146.11",
     "mask": 32
   }'
 ```
 
-### Success Response (200 OK)
+### HTTP Response
+
+On success, the HTTP response status code will be `200 OK`.
+
+### Example Response
 
 ```json
 {
@@ -403,8 +383,8 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
     "data": {
       "id": "1153",
       "mask": 32,
-      "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
-      "ip": "203.0.113.50",
+      "trunk_sid": "trmum1f708622631150902801a1n",
+      "ip": "44.248.146.11",
       "friendly_name": null,
       "date_created": "2026-01-23T11:37:36Z",
       "date_updated": "2026-01-23T11:37:36Z"
@@ -413,38 +393,21 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
 }
 ```
 
-### Response Fields
+### Response Parameters
 
-| Field | Type | Description |
-|-------|------|-------------|
-| id | String | Unique whitelisted IP identifier |
-| ip | String | Whitelisted IPv4 address |
-| mask | Integer | Subnet mask (32 = single IP) |
-| trunk_sid | String | Associated trunk identifier |
-| friendly_name | String | Optional friendly name (`null` if not set) |
-| date_created | String | ISO 8601 timestamp |
-| date_updated | String | ISO 8601 timestamp |
+| Parameter Name | Type & Value |
+|----------------|--------------|
+| id | String; Unique identifier for this ACL entry. Example: `1153` |
+| ip | String; The whitelisted IP address |
+| mask | Integer; Subnet mask in CIDR notation |
+| trunk_sid | String; The trunk this ACL is associated with |
+| friendly_name | String or null; Optional friendly name for the IP |
+| date_created | String; ISO 8601 timestamp when ACL was created |
+| date_updated | String; ISO 8601 timestamp when ACL was last updated |
 
-### Error Response (400 Bad Request - Invalid IP)
+### Error Responses
 
-```json
-{
-  "request_id": "b8c9d0e1-f2a3-4567-8901-bcdef2345678",
-  "method": "POST",
-  "http_code": 400,
-  "response": {
-    "status": "failure",
-    "code": 400,
-    "error_data": {
-      "code": 1001,
-      "message": "Invalid parameter",
-      "description": "ip must be a valid IPv4 address"
-    }
-  }
-}
-```
-
-### Error Response (409 - Duplicate IP)
+#### 409 Conflict - IP already whitelisted
 
 ```json
 {
@@ -464,65 +427,76 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
 }
 ```
 
-> **Note:** The `http_code` may be 200 but check `response.code` for the actual status.
-
 ---
 
-## 5. Add Destination URI
+## 4. Map Destination URI to Trunk
 
-Configure where incoming calls are routed. Required for Inbound/Origination.
+Configures where incoming calls should be routed. This is required for **Inbound/Origination** calls - routing calls from the telephone network to your system.
 
-**Endpoint:**
+The destination can be an IP address or FQDN (Fully Qualified Domain Name) of your PBX/SBC.
+
+### Important Notes
+
+- **For IP-based destinations:** You MUST whitelist the IP using the "Map ACL to Trunk" API first
+- **For FQDN-based destinations:** No whitelisting required (e.g., `sip.yourcompany.com`)
+- The destination format is: `<ip_or_fqdn>:<port>;transport=<protocol>`
+
+### HTTP Request
+
 ```
-POST /v2/accounts/{account_sid}/trunks/{trunk_sid}/destination-uris
+POST https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/destination-uris
 ```
 
-> ⚠️ **IMPORTANT:** You must use your **actual server's public IP address** or a valid FQDN. The API validates that the destination is reachable. Example IPs like `203.0.113.50` (documentation IPs) will fail validation.
+### Request Headers
+
+| Header | Value |
+|--------|-------|
+| Content-Type | application/json |
 
 ### Request Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| destinations | Array | Yes | Array of destination objects |
-| destinations[].destination | String | Yes | Format: `ip:port;transport=tls` or `ip:port;transport=tcp`. Must be a **real, routable IP** or valid FQDN |
+| Parameter Name | Mandatory/Optional | Value |
+|----------------|-------------------|-------|
+| destinations | Mandatory | Array; List of destination objects. Each object contains a `destination` field. |
+| destinations[].destination | Mandatory | String; SIP URI in format `<ip_or_fqdn>:<port>;transport=<protocol>`. Port is typically `5061` for TLS or `5060` for TCP. Transport can be `tls` (recommended) or `tcp`. Example: `44.248.146.11:5061;transport=tls`, `sip.company.com:5061;transport=tls` |
 
-### Example Request (TLS - Recommended)
+### Example Request (IP-based destination)
+
+**Note:** Ensure the IP `44.248.146.11` is whitelisted first using Map ACL API.
 
 ```bash
-curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/destination-uris" \
+curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/destination-uris" \
   -H "Content-Type: application/json" \
   -d '{
     "destinations": [
-      {"destination": "203.0.113.50:5061;transport=tls"}
+      {
+        "destination": "44.248.146.11:5061;transport=tls"
+      }
     ]
   }'
 ```
 
-### Example Request (TCP)
+### Example Request (FQDN-based destination)
 
 ```bash
-curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/destination-uris" \
+curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/destination-uris" \
   -H "Content-Type: application/json" \
   -d '{
     "destinations": [
-      {"destination": "203.0.113.50:5060;transport=tcp"}
+      {
+        "destination": "sip.yourcompany.com:5061;transport=tls"
+      }
     ]
   }'
 ```
 
-### Example Request (FQDN)
+### HTTP Response
 
-```bash
-curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/destination-uris" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "destinations": [
-      {"destination": "sip.mycompany.com:5061;transport=tls"}
-    ]
-  }'
-```
+On success, the HTTP response status code will be `200 OK` or `207 Multi-Status` (for partial success/failure).
 
-### Success Response (200 OK)
+The response includes `metadata` with counts of successful and failed destinations.
+
+### Example Response (Success)
 
 ```json
 {
@@ -531,7 +505,8 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
   "http_code": 200,
   "metadata": {
     "total": 1,
-    "success": 1
+    "success": 1,
+    "failed": 0
   },
   "response": [
     {
@@ -546,53 +521,36 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
         "type": "public",
         "priority": 0,
         "weight": 1,
-        "trunk_sid": "trmum1a2b3c4d5e6f7890123456"
+        "trunk_sid": "trmum1f708622631150902801a1n"
       }
     }
   ]
 }
 ```
 
-### Error Response (400/207 - Invalid Destination)
+### Response Parameters
 
-This error occurs when the destination IP is not valid or reachable:
+| Parameter Name | Type & Value |
+|----------------|--------------|
+| metadata.total | Integer; Total number of destinations in request |
+| metadata.success | Integer; Number of successfully added destinations |
+| metadata.failed | Integer; Number of failed destinations |
+| id | String; Unique identifier for this destination URI. Example: `2543` |
+| destination | String; The SIP URI (prefixed with `sip:`) |
+| type | String; Destination type: `public` |
+| priority | Integer; Priority for load balancing. Lower values = higher priority. Default: `0` |
+| weight | Integer; Weight for load balancing. Higher values = more traffic. Default: `1` |
+| trunk_sid | String; The trunk this destination is associated with |
+| date_created | String; ISO 8601 timestamp when destination was created |
+| date_updated | String; ISO 8601 timestamp when destination was last updated |
 
-```json
-{
-  "request_id": "f4909884342e4532a4ccf30d617519af",
-  "method": "POST",
-  "http_code": 207,
-  "metadata": {
-    "failed": 1,
-    "total": 1,
-    "success": 0
-  },
-  "response": [
-    {
-      "code": 400,
-      "error_data": {
-        "code": 1002,
-        "message": "Invalid parameter",
-        "description": "Destination is not a valid Ip or Fqdn"
-      },
-      "status": "failure",
-      "data": null
-    }
-  ]
-}
-```
+### Error Responses
 
-**Common causes:**
-- Using documentation/example IPs like `203.0.113.50` (RFC 5737 reserved)
-- Using private IPs that aren't publicly routable
-- FQDN doesn't resolve to a valid IP
-- IP address format is incorrect
+#### 400 Bad Request - Destination not whitelisted
 
-**Solution:** Use your actual server's public IP address or a valid FQDN.
+This error occurs when you try to add an IP-based destination that hasn't been whitelisted.
 
-### Error Response (207 - Destination Not Whitelisted)
-
-This error occurs when you try to add a destination URI for an IP that hasn't been whitelisted first:
+**Solution:** Use the "Map ACL to Trunk" API to whitelist the IP first.
 
 ```json
 {
@@ -619,26 +577,119 @@ This error occurs when you try to add a destination URI for an IP that hasn't be
 }
 ```
 
-**Solution:** For IP-based destinations, you must whitelist the IP address first using the Whitelist IP API before adding it as a destination URI. FQDNs do not require whitelisting.
+#### 400 Bad Request - Invalid IP or FQDN
+
+```json
+{
+  "request_id": "f4909884342e4532a4ccf30d617519af",
+  "method": "POST",
+  "http_code": 207,
+  "metadata": {
+    "failed": 1,
+    "total": 1,
+    "success": 0
+  },
+  "response": [
+    {
+      "code": 400,
+      "error_data": {
+        "code": 1002,
+        "message": "Invalid parameter",
+        "description": "Destination is not a valid Ip or Fqdn"
+      },
+      "status": "failure",
+      "data": null
+    }
+  ]
+}
+```
 
 ---
 
-## 6. Get Phone Numbers
+# STREAMKIT SETUP (Voice AI)
 
-List all phone numbers mapped to a trunk.
+StreamKit enables you to connect your Contact Center to Voice AI bots. The setup is similar to PSTN, but uses `mode: flow` when mapping phone numbers.
 
-**Endpoint:**
+**Setup Flow:**
+1. Create Trunk → 2. Map Phone Number (mode: flow) → 3. Map ACL to Trunk
+
+---
+
+## StreamKit: Create Trunk
+
+Same as PSTN setup. Refer to [Create Trunk](#1-create-trunk) above.
+
+---
+
+## StreamKit: Map Phone Number (Flow Mode)
+
+Same endpoint as PSTN, but with `mode: flow` to route calls to Voice AI bot.
+
+### Example Request
+
+```bash
+curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone_number": "+919876543210",
+    "mode": "flow"
+  }'
 ```
-GET /v2/accounts/{account_sid}/trunks/{trunk_sid}/phone-numbers
+
+### Example Response
+
+```json
+{
+  "request_id": "9351dabddc21476e8351d662f1ce31e1",
+  "method": "POST",
+  "http_code": 200,
+  "response": {
+    "code": 200,
+    "error_data": null,
+    "status": "success",
+    "data": {
+      "id": "41523",
+      "phone_number": "+919876543210",
+      "trunk_sid": "trmum1f708622631150902801a1n",
+      "date_created": "2026-01-23T13:28:11Z",
+      "date_updated": "2026-01-23T13:28:11Z",
+      "mode": "flow"
+    }
+  }
+}
+```
+
+---
+
+## StreamKit: Map ACL to Trunk
+
+Same as PSTN setup. Refer to [Map ACL to Trunk](#3-map-acl-to-trunk-whitelist-ip) above.
+
+---
+
+# MANAGE & VIEW
+
+APIs for viewing configurations, updating settings, and managing your trunk.
+
+---
+
+## 5. Get Phone Numbers
+
+Retrieves all phone numbers mapped to a trunk.
+
+### HTTP Request
+
+```
+GET https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers
 ```
 
 ### Example Request
 
 ```bash
-curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/phone-numbers"
+curl -X GET "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers"
 ```
 
-### Success Response (200 OK)
+### Example Response
 
 ```json
 {
@@ -647,7 +698,7 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
   "http_code": 200,
   "metadata": {
     "page_size": 50,
-    "first_page_uri": "/v2/accounts/ameyo5m/trunks/trmum1a2b3c4d5e6f7890123456/phone-numbers?offset=0&page_size=50",
+    "first_page_uri": "/v2/accounts/ameyo5m/trunks/trmum1f708622631150902801a1n/phone-numbers?offset=0&page_size=50",
     "prev_page_uri": null,
     "next_page_uri": null
   },
@@ -659,7 +710,7 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
       "data": {
         "id": "41523",
         "phone_number": "+918040264208",
-        "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
+        "trunk_sid": "trmum1f708622631150902801a1n",
         "date_created": "2026-01-23T13:28:11Z",
         "date_updated": "2026-01-23T13:41:59Z",
         "mode": "flow"
@@ -669,33 +720,35 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
 }
 ```
 
-### Response Fields
+### Response Parameters
 
-| Field | Type | Description |
-|-------|------|-------------|
-| metadata.page_size | Integer | Number of items per page (default 50) |
-| metadata.first_page_uri | String | URI to first page of results |
-| metadata.prev_page_uri | String | URI to previous page (null if on first page) |
-| metadata.next_page_uri | String | URI to next page (null if on last page) |
+| Parameter Name | Type & Value |
+|----------------|--------------|
+| metadata.page_size | Integer; Number of results per page |
+| metadata.first_page_uri | String; URI for the first page |
+| metadata.prev_page_uri | String or null; URI for previous page (null if on first page) |
+| metadata.next_page_uri | String or null; URI for next page (null if on last page) |
+| response[] | Array; List of phone number objects |
 
 ---
 
-## 7. Get Whitelisted IPs
+## 6. Get ACLs (Whitelisted IPs)
 
-List all whitelisted IPs for a trunk.
+Retrieves all whitelisted IP addresses for a trunk.
 
-**Endpoint:**
+### HTTP Request
+
 ```
-GET /v2/accounts/{account_sid}/trunks/{trunk_sid}/whitelisted-ips
+GET https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/whitelisted-ips
 ```
 
 ### Example Request
 
 ```bash
-curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/whitelisted-ips"
+curl -X GET "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/whitelisted-ips"
 ```
 
-### Success Response (200 OK)
+### Example Response
 
 ```json
 {
@@ -704,7 +757,7 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
   "http_code": 200,
   "metadata": {
     "page_size": 50,
-    "first_page_uri": "/v2/accounts/ameyo5m/trunks/trmum1a2b3c4d5e6f7890123456/whitelisted-ips?offset=0&page_size=50",
+    "first_page_uri": "/v2/accounts/ameyo5m/trunks/trmum1f708622631150902801a1n/whitelisted-ips?offset=0&page_size=50",
     "prev_page_uri": null,
     "next_page_uri": null
   },
@@ -716,7 +769,7 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
       "data": {
         "id": "1154",
         "mask": 32,
-        "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
+        "trunk_sid": "trmum1f708622631150902801a1n",
         "ip": "44.248.146.11",
         "friendly_name": null,
         "date_created": "2026-01-23T13:30:04Z",
@@ -729,22 +782,23 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
 
 ---
 
-## 8. Get Destination URIs
+## 7. Get Destination URIs
 
-List all destination URIs for inbound routing.
+Retrieves all destination URIs configured for a trunk.
 
-**Endpoint:**
+### HTTP Request
+
 ```
-GET /v2/accounts/{account_sid}/trunks/{trunk_sid}/destination-uris
+GET https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/destination-uris
 ```
 
 ### Example Request
 
 ```bash
-curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/destination-uris"
+curl -X GET "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/destination-uris"
 ```
 
-### Success Response (200 OK)
+### Example Response
 
 ```json
 {
@@ -753,7 +807,7 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
   "http_code": 200,
   "metadata": {
     "page_size": 50,
-    "first_page_uri": "/v2/accounts/ameyo5m/trunks/trmum1a2b3c4d5e6f7890123456/destination-uris?offset=0&page_size=50",
+    "first_page_uri": "/v2/accounts/ameyo5m/trunks/trmum1f708622631150902801a1n/destination-uris?offset=0&page_size=50",
     "prev_page_uri": null,
     "next_page_uri": null
   },
@@ -764,13 +818,13 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
       "status": "success",
       "data": {
         "id": "2544",
-        "destination": "sip:sip.mycompany.com:5061;transport=tls",
+        "destination": "sip:sip.company.com:5061;transport=tls",
         "date_created": "2026-01-23T13:39:06Z",
         "date_updated": "2026-01-23T13:39:06Z",
         "type": "public",
         "priority": 0,
         "weight": 1,
-        "trunk_sid": "trmum1a2b3c4d5e6f7890123456"
+        "trunk_sid": "trmum1f708622631150902801a1n"
       }
     },
     {
@@ -785,56 +839,138 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
         "type": "public",
         "priority": 0,
         "weight": 1,
-        "trunk_sid": "trmum1a2b3c4d5e6f7890123456"
+        "trunk_sid": "trmum1f708622631150902801a1n"
       }
     }
   ]
 }
 ```
 
-### Response Fields
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | String | Unique destination URI identifier |
-| destination | String | SIP URI with transport |
-| type | String | Destination type (`public`) |
-| priority | Integer | Priority for routing (lower = higher priority) |
-| weight | Integer | Weight for load balancing |
-| trunk_sid | String | Associated trunk identifier |
-
 ---
 
-## 9. Set Trunk Alias
+## 8. Update Phone Number Mode
 
-Set an external caller ID for outbound calls.
+Updates the routing mode for a mapped phone number. Use this to switch between PSTN and StreamKit (Voice AI) modes.
 
-**Endpoint:**
+### HTTP Request
+
 ```
-POST /v2/accounts/{account_sid}/trunks/{trunk_sid}/settings
+PUT https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers/<phone_number_id>
 ```
+
+**Important:** The `<phone_number_id>` is the **numeric ID** returned when you mapped the phone number (e.g., `41523`), NOT the phone number itself.
+
+### Request Headers
+
+| Header | Value |
+|--------|-------|
+| Content-Type | application/json |
 
 ### Request Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| settings | Array | Yes | Array of setting objects |
-| settings[].name | String | Yes | Setting name. Use `trunk_external_alias` |
-| settings[].value | String | Yes | Phone number in E.164 format |
+| Parameter Name | Mandatory/Optional | Value |
+|----------------|-------------------|-------|
+| phone_number | Mandatory | String; The phone number in E.164 format. Must match the phone number associated with the ID. Example: `+919876543210` |
+| mode | Mandatory | String; The new routing mode. Can be: `pstn` - Route calls to telephone network, `flow` - Route calls to Voice AI bot (StreamKit) |
+
+### Example Request (Switch to Flow mode)
+
+```bash
+curl -X PUT "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers/41523" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone_number": "+918040264208",
+    "mode": "flow"
+  }'
+```
+
+### Example Request (Switch to PSTN mode)
+
+```bash
+curl -X PUT "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers/41523" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone_number": "+918040264208",
+    "mode": "pstn"
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "request_id": "c719cd56eb5943e789e1bdbd4ce1515a",
+  "method": "PUT",
+  "http_code": 200,
+  "response": {
+    "code": 200,
+    "error_data": null,
+    "status": "success",
+    "data": {
+      "id": "41523",
+      "phone_number": "+918040264208",
+      "trunk_sid": "trmum1f708622631150902801a1n",
+      "date_created": "2026-01-23T13:28:11Z",
+      "date_updated": "2026-01-23T13:41:59Z",
+      "mode": "flow"
+    }
+  }
+}
+```
+
+### Response Parameters
+
+| Parameter Name | Type & Value |
+|----------------|--------------|
+| id | String; The phone number mapping ID |
+| phone_number | String; The phone number in E.164 format |
+| trunk_sid | String; The associated trunk |
+| mode | String; The updated routing mode (`pstn` or `flow`) |
+| date_created | String; ISO 8601 timestamp when mapping was created |
+| date_updated | String; ISO 8601 timestamp when mapping was updated (will be updated after this call) |
+
+---
+
+## 9. Set Trunk Alias (Caller ID)
+
+Sets the phone number displayed to called parties on outbound calls. This is useful when you want to display a specific caller ID regardless of which phone number is mapped to the trunk.
+
+### HTTP Request
+
+```
+POST https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/settings
+```
+
+### Request Headers
+
+| Header | Value |
+|--------|-------|
+| Content-Type | application/json |
+
+### Request Parameters
+
+| Parameter Name | Mandatory/Optional | Value |
+|----------------|-------------------|-------|
+| settings | Mandatory | Array; List of setting objects |
+| settings[].name | Mandatory | String; Setting name. Use `trunk_external_alias` for caller ID |
+| settings[].value | Mandatory | String; The phone number to display as caller ID. Should be in E.164 format. Example: `+919876543210` |
 
 ### Example Request
 
 ```bash
-curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/settings" \
+curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/settings" \
   -H "Content-Type: application/json" \
   -d '{
     "settings": [
-      {"name": "trunk_external_alias", "value": "+919876543210"}
+      {
+        "name": "trunk_external_alias",
+        "value": "+919876543210"
+      }
     ]
   }'
 ```
 
-### Success Response (200 OK)
+### Example Response
 
 ```json
 {
@@ -853,7 +989,7 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
       "data": {
         "name": "trunk_external_alias",
         "value": "+919876543210",
-        "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
+        "trunk_sid": "trmum1f708622631150902801a1n",
         "date_created": "2026-01-23T13:34:50Z",
         "date_updated": "2026-01-23T13:34:50Z"
       }
@@ -862,24 +998,39 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
 }
 ```
 
+### Response Parameters
+
+| Parameter Name | Type & Value |
+|----------------|--------------|
+| metadata.total | Integer; Total number of settings in request |
+| metadata.success | Integer; Number of successfully applied settings |
+| name | String; Setting name (`trunk_external_alias`) |
+| value | String; The caller ID phone number |
+| trunk_sid | String; The associated trunk |
+| date_created | String; ISO 8601 timestamp when setting was created |
+| date_updated | String; ISO 8601 timestamp when setting was last updated |
+
 ---
 
 ## 10. Delete Trunk
 
-Permanently delete a trunk and all configurations. This cannot be undone.
+Permanently deletes a trunk and all its associated configurations (phone numbers, ACLs, destination URIs).
 
-**Endpoint:**
+**⚠️ Warning:** This action cannot be undone. All associated phone number mappings, whitelisted IPs, and destination URIs will be permanently deleted.
+
+### HTTP Request
+
 ```
-DELETE /v2/accounts/{account_sid}/trunks?trunk_sid={trunk_sid}
+DELETE https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks?trunk_sid=<trunk_sid>
 ```
 
 ### Example Request
 
 ```bash
-curl -X DELETE "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks?trunk_sid=trmum1a2b3c4d5e6f7890123456"
+curl -X DELETE "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks?trunk_sid=<trunk_sid>"
 ```
 
-### Success Response (200 OK)
+### Example Response
 
 ```json
 {
@@ -901,113 +1052,74 @@ curl -X DELETE "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/acc
       "registration_enabled": "disabled",
       "edge_preference": "auto",
       "nso_code": "ANY-ANY",
-      "secure_trunking": "disabled"
+      "secure_trunking": "disabled",
+      "destination_uris": "/v2/accounts/ameyo5m/trunks/trmum15f77c83605998cdb9d1a1n/destination-uris",
+      "whitelisted_ips": "/v2/accounts/ameyo5m/trunks/trmum15f77c83605998cdb9d1a1n/whitelisted-ips",
+      "credentials": "/v2/accounts/ameyo5m/trunks/trmum15f77c83605998cdb9d1a1n/credentials",
+      "phone_numbers": "/v2/accounts/ameyo5m/trunks/trmum15f77c83605998cdb9d1a1n/phone-numbers"
     }
   }
 }
 ```
 
-> **Note:** The delete response returns the full trunk data of the deleted trunk.
+### Response Parameters
+
+The response returns the full trunk data that was deleted, allowing you to verify which trunk was removed.
 
 ---
 
-# HTTP Status Codes
+# Error Codes Reference
 
-| Code | Status | Description |
-|------|--------|-------------|
-| 200 | OK | Request successful |
-| 207 | Multi-Status | Partial success (check individual responses) |
-| 400 | Bad Request | Invalid parameters or malformed request |
-| 401 | Unauthorized | Invalid or missing credentials |
-| 403 | Forbidden | Access denied |
-| 404 | Not Found | Resource does not exist |
-| 409 | Conflict | Resource already exists (duplicate) |
-| 415 | Unsupported Media Type | Wrong Content-Type (use application/json) |
-| 422 | Unprocessable Entity | Validation failed |
-| 429 | Too Many Requests | Rate limit exceeded (200/min) |
-| 500 | Internal Server Error | Server error |
+| Error Code | HTTP Status | Message | Description |
+|------------|-------------|---------|-------------|
+| 1000 | 404 | Not Found | Resource not found (invalid trunk_sid, phone_number_id, etc.) |
+| 1001 | 400 | Mandatory Parameter missing | Required parameter not provided |
+| 1002 | 400 | Invalid parameter | Parameter value is invalid or malformed |
+| 1007 | 400 | Invalid request body | JSON parsing error or malformed request body |
+| 1008 | 409 | Duplicate resource | Resource already exists (duplicate trunk name, IP already whitelisted, etc.) |
+| 1011 | 415 | Unsupported content type | Wrong Content-Type header. Use `application/json` |
 
 ---
 
-# Error Codes
+# Quick Reference
 
-| Code | HTTP | Message | Description | Resolution |
-|------|------|---------|-------------|------------|
-| 1000 | 404 | Not Found | Resource not found or invalid body | Check URL and request body |
-| 1001 | 400 | Invalid parameter / Mandatory Parameter missing | Parameter missing or invalid | Verify all required parameters |
-| 1002 | 400 | Invalid parameter | Destination not valid or not whitelisted | Use valid IP/FQDN, whitelist IP first |
-| 1007 | 400 | Invalid request body | JSON parsing failed | Check JSON syntax |
-| 1008 | 409 | Duplicate resource | IP or phone number already exists | Use different IP/number or delete existing |
-| 1011 | 415 | Unsupported content type | Wrong Content-Type header | Use `Content-Type: application/json` |
-| 1010 | 401 | Authorization failed | Invalid API key or token | Check credentials |
-| 1020 | 422 | Validation error | Request validation failed | Check all parameters |
-| 1030 | 429 | Rate limit exceeded | Too many requests | Wait and retry |
+## API Endpoints Summary
 
----
+| API | Method | Endpoint |
+|-----|--------|----------|
+| Create Trunk | POST | `/v2/accounts/{sid}/trunks` |
+| Map Phone Number | POST | `/v2/accounts/{sid}/trunks/{trunk_sid}/phone-numbers` |
+| Map ACL | POST | `/v2/accounts/{sid}/trunks/{trunk_sid}/whitelisted-ips` |
+| Map Destination URI | POST | `/v2/accounts/{sid}/trunks/{trunk_sid}/destination-uris` |
+| Get Phone Numbers | GET | `/v2/accounts/{sid}/trunks/{trunk_sid}/phone-numbers` |
+| Get ACLs | GET | `/v2/accounts/{sid}/trunks/{trunk_sid}/whitelisted-ips` |
+| Get Destination URIs | GET | `/v2/accounts/{sid}/trunks/{trunk_sid}/destination-uris` |
+| Update Phone Number Mode | PUT | `/v2/accounts/{sid}/trunks/{trunk_sid}/phone-numbers/{id}` |
+| Set Trunk Alias | POST | `/v2/accounts/{sid}/trunks/{trunk_sid}/settings` |
+| Delete Trunk | DELETE | `/v2/accounts/{sid}/trunks?trunk_sid={trunk_sid}` |
 
-# End-to-End Example: PSTN Setup (Outbound + Inbound)
+## Mode Options
 
-Complete setup for making and receiving PSTN calls:
+| Mode | Description | Use Case |
+|------|-------------|----------|
+| `pstn` | Routes calls to telephone network | Standard PBX/Contact Center integration |
+| `flow` | Routes calls to Voice AI bot | StreamKit/Voice AI integration |
 
-```bash
-# Step 1: Create Trunk
-curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks" \
-  -H "Content-Type: application/json" \
-  -d '{"trunk_name": "my_trunk", "nso_code": "ANY-ANY", "domain_name": "ACCOUNT_SID.pstn.exotel.com"}'
-# Response: Save trunk_sid from response
+## Common Setup Flows
 
-# Step 2: Map Phone Number (PSTN mode)
-curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/phone-numbers" \
-  -H "Content-Type: application/json" \
-  -d '{"phone_number": "+919876543210"}'
-# Response: Save 'id' for Update Phone Number API
+### PSTN (Outbound + Inbound)
+```
+Create Trunk → Map Phone Number → Map ACL → Map Destination URI
+```
 
-# Step 3: Whitelist IP (for Outbound/Termination)
-curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/whitelisted-ips" \
-  -H "Content-Type: application/json" \
-  -d '{"ip": "YOUR_SERVER_IP", "mask": 32}'
-
-# Step 4: Add Destination URI (for Inbound/Origination)
-# Note: If using IP, whitelist it first (Step 3). FQDNs don't need whitelisting.
-curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/destination-uris" \
-  -H "Content-Type: application/json" \
-  -d '{"destinations": [{"destination": "YOUR_SERVER_IP:5061;transport=tls"}]}'
+### StreamKit (Voice AI)
+```
+Create Trunk → Map Phone Number (mode: flow) → Map ACL
 ```
 
 ---
 
-# End-to-End Example: StreamKit Setup (Voice AI)
+# Support
 
-Complete setup for Voice AI bot integration:
-
-```bash
-# Step 1: Create Trunk
-curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks" \
-  -H "Content-Type: application/json" \
-  -d '{"trunk_name": "streamkit_trunk", "nso_code": "ANY-ANY", "domain_name": "ACCOUNT_SID.pstn.exotel.com"}'
-# Response: Save trunk_sid from response
-
-# Step 2: Map Phone Number with Flow Mode
-curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/phone-numbers" \
-  -H "Content-Type: application/json" \
-  -d '{"phone_number": "+919876543210", "mode": "flow"}'
-# Response: Save 'id' for Update Phone Number API
-
-# Step 3: Whitelist IP
-curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/whitelisted-ips" \
-  -H "Content-Type: application/json" \
-  -d '{"ip": "YOUR_SERVER_IP", "mask": 32}'
-```
-
----
-
-# Validation Rules
-
-| Field | Rule | Example Valid | Example Invalid |
-|-------|------|---------------|-----------------|
-| trunk_name | Alphanumeric + underscore, max 16 chars | `my_trunk_01` | `my-trunk!` |
-| phone_number | E.164 format with + prefix | `+919876543210` | `9876543210` |
-| ip | Valid IPv4 address | `203.0.113.50` | `256.1.2.3` |
-| mask | Integer 1-32 | `32` | `33` |
-| mode | `pstn` or `flow` | `pstn` | `PSTN` |
-| transport | `tcp` or `tls` | `tls` | `udp` |
+- Documentation: https://developer.exotel.com
+- Email: support@exotel.com

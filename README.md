@@ -1,6 +1,6 @@
 # Exotel SIP Trunking APIs
 
-Connect your PBX or Contact Center to the telephone network.
+Connect your PBX, Contact Center, or Voice AI system to the telephone network.
 
 ---
 
@@ -15,10 +15,10 @@ From Exotel Dashboard → API Credentials:
 
 ### 2. Choose Your Use Case
 
-| Use Case | Description | Steps |
-|----------|-------------|-------|
-| **PSTN (Standard)** | Make & receive calls via telephone network | Create Trunk → Map DID → Whitelist IP → Add Destination |
-| **StreamKit (Voice AI)** | Connect to Voice AI bots | Create Trunk → Map DID (mode: flow) → Whitelist IP |
+| Use Case | Description | Setup Steps |
+|----------|-------------|-------------|
+| **PSTN (Standard)** | Make & receive calls via telephone network | Create Trunk → Map Phone Number → Map ACL → Map Destination URI |
+| **StreamKit (Voice AI)** | Connect to Voice AI bots | Create Trunk → Map Phone Number (mode: flow) → Map ACL |
 
 ---
 
@@ -27,21 +27,21 @@ From Exotel Dashboard → API Credentials:
 ### Step 1: Create Trunk
 
 ```bash
-curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks" \
+curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks" \
   -H "Content-Type: application/json" \
   -d '{
     "trunk_name": "my_trunk",
     "nso_code": "ANY-ANY",
-    "domain_name": "ACCOUNT_SID.pstn.exotel.com"
+    "domain_name": "<your_sid>.pstn.exotel.com"
   }'
 ```
 
 **Save `trunk_sid` from response!**
 
-### Step 2: Map Phone Number
+### Step 2: Map Phone Number to Trunk
 
 ```bash
-curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/phone-numbers" \
+curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers" \
   -H "Content-Type: application/json" \
   -d '{
     "phone_number": "+919876543210"
@@ -50,28 +50,28 @@ curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SI
 
 **Save `id` from response** (needed for Update Mode API).
 
-### Step 3: Whitelist IP (for Outbound/Termination)
+### Step 3: Map ACL to Trunk (for Outbound/Termination)
 
 ```bash
-curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/whitelisted-ips" \
+curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/whitelisted-ips" \
   -H "Content-Type: application/json" \
   -d '{
-    "ip": "YOUR_SERVER_IP",
+    "ip": "<your_server_ip>",
     "mask": 32
   }'
 ```
 
-### Step 4: Add Destination URI (for Inbound/Origination)
+### Step 4: Map Destination URI to Trunk (for Inbound/Origination)
 
-> **Important:** If using an IP address, whitelist it first (Step 3). FQDNs don't need whitelisting.
+> **Important:** For IP destinations, map ACL first (Step 3). FQDNs don't need ACL mapping.
 
 ```bash
-curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/destination-uris" \
+curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/destination-uris" \
   -H "Content-Type: application/json" \
   -d '{
     "destinations": [
       {
-        "destination": "YOUR_SERVER_IP:5061;transport=tls"
+        "destination": "<your_server_ip>:5061;transport=tls"
       }
     ]
   }'
@@ -90,7 +90,7 @@ Same as PSTN Step 1.
 ### Step 2: Map Phone Number (Flow Mode)
 
 ```bash
-curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/phone-numbers" \
+curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers" \
   -H "Content-Type: application/json" \
   -d '{
     "phone_number": "+919876543210",
@@ -100,7 +100,7 @@ curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SI
 
 > **Note:** `mode: flow` routes calls to Voice AI bot instead of PSTN.
 
-### Step 3: Whitelist IP
+### Step 3: Map ACL to Trunk
 
 Same as PSTN Step 3.
 
@@ -111,7 +111,7 @@ Same as PSTN Step 3.
 ### Update Phone Number Mode (pstn ↔ flow)
 
 ```bash
-curl -X PUT "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/phone-numbers/PHONE_NUMBER_ID" \
+curl -X PUT "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers/<phone_number_id>" \
   -H "Content-Type: application/json" \
   -d '{
     "phone_number": "+919876543210",
@@ -119,12 +119,12 @@ curl -X PUT "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID
   }'
 ```
 
-> **Note:** `PHONE_NUMBER_ID` is the numeric ID (e.g., `41523`) from Map Phone Number response, NOT the phone number!
+> **Note:** `<phone_number_id>` is the numeric ID (e.g., `41523`) from Map Phone Number response, NOT the phone number!
 
-### Set Caller ID (for Outbound)
+### Set Trunk Alias (Caller ID for Outbound)
 
 ```bash
-curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/settings" \
+curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/settings" \
   -H "Content-Type: application/json" \
   -d '{
     "settings": [
@@ -140,19 +140,19 @@ curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SI
 
 ```bash
 # Get phone numbers
-curl -X GET "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/phone-numbers"
+curl -X GET "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers"
 
-# Get whitelisted IPs
-curl -X GET "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/whitelisted-ips"
+# Get ACLs (whitelisted IPs)
+curl -X GET "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/whitelisted-ips"
 
 # Get destination URIs
-curl -X GET "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/destination-uris"
+curl -X GET "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/destination-uris"
 ```
 
 ### Delete Trunk
 
 ```bash
-curl -X DELETE "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks?trunk_sid=TRUNK_SID"
+curl -X DELETE "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks?trunk_sid=<trunk_sid>"
 ```
 
 ---
@@ -161,8 +161,10 @@ curl -X DELETE "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_
 
 | Setting | Value |
 |---------|-------|
-| Base URL | `https://api.in.exotel.com` |
-| Auth | HTTP Basic (`API_KEY:API_TOKEN`) |
+| Base URL | `https://<subdomain>` |
+| Subdomain (India) | `api.in.exotel.com` |
+| Subdomain (Singapore) | `api.exotel.com` |
+| Auth | HTTP Basic (`<api_key>:<api_token>`) |
 | Content-Type | `application/json` |
 | Rate Limit | 200 requests/minute |
 
@@ -193,7 +195,7 @@ curl -X DELETE "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_
 | Error | Cause | Solution |
 |-------|-------|----------|
 | HTTP 415 | Wrong content type | Use `Content-Type: application/json` |
-| "Destination not whitelisted" | IP not whitelisted | Whitelist IP before adding as destination |
+| "Destination not whitelisted" | IP not in ACL | Map ACL before mapping as destination |
 | Duplicate resource (1008) | Already exists | Use different name/IP or delete existing |
 
 ---

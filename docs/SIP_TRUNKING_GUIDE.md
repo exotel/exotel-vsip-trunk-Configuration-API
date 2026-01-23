@@ -35,7 +35,7 @@ YOUR SYSTEM ──> EXOTEL ──> PSTN ──> CUSTOMER PHONE
 
 - Calls originate from your PBX/Contact Center
 - Exotel routes to the telephone network
-- Requires static IP whitelisting
+- Requires Map ACL (IP whitelisting)
 - Uses `mode: "pstn"`
 
 ### Inbound / Origination
@@ -49,6 +49,7 @@ CUSTOMER PHONE ──> PSTN ──> EXOTEL ──> YOUR SYSTEM
 - Customer dials your number
 - Exotel routes to your server
 - Supports IP or FQDN destination
+- Requires Map Destination URI
 
 ### StreamKit
 
@@ -60,7 +61,7 @@ YOUR SYSTEM ──> EXOTEL ──> VOICE AI BOT (WebSocket) configured in App Ba
 
 - Calls route to AI voicebot
 - Real-time audio streaming
-- Requires static IP whitelisting
+- Requires Map ACL (IP whitelisting)
 - Uses `mode: "flow"`
 
 ---
@@ -80,9 +81,30 @@ The `mode` parameter in Map Phone Number API determines call routing:
 
 | Use Case | Static IP | FQDN |
 |----------|-----------|------|
-| Outbound / Termination | Required | Not supported |
+| Outbound / Termination | Required (Map ACL) | Not supported |
 | Inbound / Origination | Supported | Supported |
-| StreamKit | Required | Not supported |
+| StreamKit | Required (Map ACL) | Not supported |
+
+---
+
+## Setup Flow Summary
+
+### PSTN (Outbound + Inbound)
+
+```
+1. Create Trunk
+2. Map Phone Number to Trunk
+3. Map ACL to Trunk (for Outbound - whitelist your server IP)
+4. Map Destination URI to Trunk (for Inbound - your server endpoint)
+```
+
+### StreamKit (Voice AI)
+
+```
+1. Create Trunk
+2. Map Phone Number to Trunk (mode: flow)
+3. Map ACL to Trunk (whitelist your server IP)
+```
 
 ---
 
@@ -125,7 +147,7 @@ Learn more: https://exotel.com/products/streamkit-cloud-connector/
 | Code | Description | Solution |
 |------|-------------|----------|
 | 401 | Unauthorized | Check SIP credentials |
-| 403 | Forbidden | Whitelist your IP |
+| 403 | Forbidden | Map ACL (whitelist your IP) |
 | 404 | Not Found | Check phone number format |
 | 486 | Busy | User on another call |
 
@@ -142,10 +164,10 @@ Learn more: https://exotel.com/products/streamkit-cloud-connector/
 
 | Issue | Cause | Solution |
 |-------|-------|----------|
-| 403 on calls | IP not whitelisted | Add IP via Whitelist IP API |
+| 403 on calls | IP not in ACL | Use Map ACL API to whitelist IP |
 | 404 on calls | Invalid number | Use E.164 format (+919876543210) |
-| No inbound calls | Missing destination | Add destination URI (whitelist IP first!) |
-| "Destination not whitelisted" | IP not whitelisted | Whitelist IP before adding as destination |
+| No inbound calls | Missing destination | Use Map Destination URI API (map ACL first for IP!) |
+| "Destination not whitelisted" | IP not in ACL | Map ACL before mapping as destination |
 | One-way audio | Firewall blocking RTP | Open UDP 10000-20000 |
 | HTTP 415 error | Wrong content type | Use `Content-Type: application/json` |
 | Duplicate resource error | Already exists | Use different name/IP or delete existing |
@@ -163,7 +185,23 @@ After completing API setup, configure your PBX:
 | Username | `trunk_sid` from Create Trunk response |
 | Transport | TCP or TLS |
 
-> **Note:** Ensure your server IP is whitelisted before attempting to connect.
+> **Note:** Ensure your server IP is mapped to ACL (whitelisted) before attempting to connect.
+
+---
+
+## API Reference
+
+For detailed API documentation with request/response examples, see [API Reference](API_REFERENCE.md).
+
+| API | Purpose |
+|-----|---------|
+| Create Trunk | Create new SIP trunk |
+| Map Phone Number | Associate phone number with trunk |
+| Map ACL | Whitelist IP for authentication |
+| Map Destination URI | Configure inbound routing |
+| Update Phone Number Mode | Switch between pstn and flow modes |
+| Set Trunk Alias | Set outbound caller ID |
+| Delete Trunk | Remove trunk and all configurations |
 
 ---
 

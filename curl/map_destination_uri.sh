@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 # ============================================================================
-# ADD DESTINATION URI
+# MAP DESTINATION URI TO TRUNK
 # Configures where incoming calls are routed (your PBX/server)
 # Required for: Inbound/Origination calls
 # ============================================================================
 # IMPORTANT:
-# - For IP addresses: You MUST whitelist the IP first!
+# - For IP addresses: You MUST map ACL (whitelist) the IP first!
 # - For FQDNs (e.g., sip.company.com): No whitelisting required
 # ============================================================================
 
@@ -25,7 +25,7 @@ SUBDOMAIN="${SUBDOMAIN:-api.in.exotel.com}"
 PORT="${PORT:-5061}"
 TRANSPORT="${TRANSPORT:-tls}"  # tls (recommended) or tcp
 
-echo "Adding destination: ${DESTINATION}:${PORT};transport=${TRANSPORT}"
+echo "Mapping destination URI: ${DESTINATION}:${PORT};transport=${TRANSPORT}"
 
 curl -X POST "https://${API_KEY}:${API_TOKEN}@${SUBDOMAIN}/v2/accounts/${ACCOUNT_SID}/trunks/${TRUNK_SID}/destination-uris" \
   -H "Content-Type: application/json" \
