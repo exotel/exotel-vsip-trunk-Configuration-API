@@ -267,6 +267,28 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
 }
 ```
 
+### Error Response (409 - Duplicate Phone Number)
+
+```json
+{
+  "request_id": "524f5159c04b44508f846cba89aeb87e",
+  "method": "POST",
+  "http_code": 200,
+  "response": {
+    "code": 409,
+    "error_data": {
+      "code": 1008,
+      "message": "Duplicate resource",
+      "description": "Unable to create DidTrunkMapping with TrunkSid trmum15f77c83605998cdb9d1a1n"
+    },
+    "status": "failure",
+    "data": null
+  }
+}
+```
+
+> **Note:** This error occurs when the phone number is already mapped to this trunk.
+
 ---
 
 ## 3. Update Phone Number Mode
@@ -414,6 +436,28 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
 }
 ```
 
+### Error Response (409 - Duplicate IP)
+
+```json
+{
+  "request_id": "901c1fb5f9c244fea99fdf498665f229",
+  "method": "POST",
+  "http_code": 200,
+  "response": {
+    "code": 409,
+    "error_data": {
+      "code": 1008,
+      "message": "Duplicate resource",
+      "description": "Unable to Whitelist-ip with ip 44.248.146.10"
+    },
+    "status": "failure",
+    "data": null
+  }
+}
+```
+
+> **Note:** The `http_code` may be 200 but check `response.code` for the actual status.
+
 ---
 
 ## 5. Add Destination URI
@@ -425,12 +469,14 @@ Configure where incoming calls are routed. Required for Inbound/Origination.
 POST /v2/accounts/{account_sid}/trunks/{trunk_sid}/destination-uris
 ```
 
+> ⚠️ **IMPORTANT:** You must use your **actual server's public IP address** or a valid FQDN. The API validates that the destination is reachable. Example IPs like `203.0.113.50` (documentation IPs) will fail validation.
+
 ### Request Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | destinations | Array | Yes | Array of destination objects |
-| destinations[].destination | String | Yes | Format: `ip:port;transport=tls` or `ip:port;transport=tcp` |
+| destinations[].destination | String | Yes | Format: `ip:port;transport=tls` or `ip:port;transport=tcp`. Must be a **real, routable IP** or valid FQDN |
 
 ### Example Request (TLS - Recommended)
 
@@ -472,25 +518,100 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
 
 ```json
 {
-  "request_id": "c9d0e1f2-a3b4-5678-9012-cdef34567890",
+  "request_id": "63999f0a98a24a0aa58ab5b74aec9f0a",
   "method": "POST",
   "http_code": 200,
+  "metadata": {
+    "total": 1,
+    "success": 1
+  },
   "response": [
     {
       "code": 200,
       "error_data": null,
       "status": "success",
       "data": {
-        "id": "du_203011350_5061_001",
-        "destination": "sip:203.0.113.50:5061;transport=tls",
-        "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
-        "date_created": "2026-01-23T10:20:00Z",
-        "date_updated": "2026-01-23T10:20:00Z"
+        "id": "2543",
+        "destination": "sip:44.248.146.11:5061;transport=tls",
+        "date_created": "2026-01-23T13:38:32Z",
+        "date_updated": "2026-01-23T13:38:32Z",
+        "type": "public",
+        "priority": 0,
+        "weight": 1,
+        "trunk_sid": "trmum1a2b3c4d5e6f7890123456"
       }
     }
   ]
 }
 ```
+
+### Error Response (400/207 - Invalid Destination)
+
+This error occurs when the destination IP is not valid or reachable:
+
+```json
+{
+  "request_id": "f4909884342e4532a4ccf30d617519af",
+  "method": "POST",
+  "http_code": 207,
+  "metadata": {
+    "failed": 1,
+    "total": 1,
+    "success": 0
+  },
+  "response": [
+    {
+      "code": 400,
+      "error_data": {
+        "code": 1002,
+        "message": "Invalid parameter",
+        "description": "Destination is not a valid Ip or Fqdn"
+      },
+      "status": "failure",
+      "data": null
+    }
+  ]
+}
+```
+
+**Common causes:**
+- Using documentation/example IPs like `203.0.113.50` (RFC 5737 reserved)
+- Using private IPs that aren't publicly routable
+- FQDN doesn't resolve to a valid IP
+- IP address format is incorrect
+
+**Solution:** Use your actual server's public IP address or a valid FQDN.
+
+### Error Response (207 - Destination Not Whitelisted)
+
+This error occurs when you try to add a destination URI for an IP that hasn't been whitelisted first:
+
+```json
+{
+  "request_id": "c06dc46304aa406ea7daca83785bc7a9",
+  "method": "POST",
+  "http_code": 207,
+  "metadata": {
+    "failed": 1,
+    "total": 1,
+    "success": 0
+  },
+  "response": [
+    {
+      "code": 400,
+      "error_data": {
+        "code": 1002,
+        "message": "Invalid parameter",
+        "description": "Destination not whitelisted"
+      },
+      "status": "failure",
+      "data": null
+    }
+  ]
+}
+```
+
+**Solution:** For IP-based destinations, you must whitelist the IP address first using the Whitelist IP API before adding it as a destination URI. FQDNs do not require whitelisting.
 
 ---
 
@@ -528,6 +649,19 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
 }
 ```
 
+### Empty Response (No Credentials)
+
+If no credentials have been configured, the response will be an empty array:
+
+```json
+{
+  "request_id": "4b15de3688c64a6184ca3777d5cfa046",
+  "method": "GET",
+  "http_code": 200,
+  "response": []
+}
+```
+
 **Use these credentials in your PBX:**
 
 | PBX Setting | Value |
@@ -558,34 +692,41 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
 
 ```json
 {
-  "request_id": "e1f2a3b4-c5d6-7890-1234-ef5678901234",
+  "request_id": "785471d288054cbf8c677b75e0b5f2f8",
   "method": "GET",
   "http_code": 200,
-  "response": {
-    "code": 200,
-    "error_data": null,
-    "status": "success",
-    "data": [
-      {
-        "id": "41512",
-        "phone_number": "+919876543210",
+  "metadata": {
+    "page_size": 50,
+    "first_page_uri": "/v2/accounts/ameyo5m/trunks/trmum1a2b3c4d5e6f7890123456/phone-numbers?offset=0&page_size=50",
+    "prev_page_uri": null,
+    "next_page_uri": null
+  },
+  "response": [
+    {
+      "code": 200,
+      "error_data": null,
+      "status": "success",
+      "data": {
+        "id": "41523",
+        "phone_number": "+918040264208",
         "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
-        "date_created": "2026-01-23T10:05:00Z",
-        "date_updated": "2026-01-23T10:05:00Z",
-        "mode": null
-      },
-      {
-        "id": "41513",
-        "phone_number": "+919876543211",
-        "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
-        "date_created": "2026-01-23T10:06:00Z",
-        "date_updated": "2026-01-23T10:06:00Z",
+        "date_created": "2026-01-23T13:28:11Z",
+        "date_updated": "2026-01-23T13:41:59Z",
         "mode": "flow"
       }
-    ]
-  }
+    }
+  ]
 }
 ```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| metadata.page_size | Integer | Number of items per page (default 50) |
+| metadata.first_page_uri | String | URI to first page of results |
+| metadata.prev_page_uri | String | URI to previous page (null if on first page) |
+| metadata.next_page_uri | String | URI to next page (null if on last page) |
 
 ---
 
@@ -608,25 +749,31 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
 
 ```json
 {
-  "request_id": "f2a3b4c5-d6e7-8901-2345-f67890123456",
+  "request_id": "91dc982ca79846479c6f9678c788cfc1",
   "method": "GET",
   "http_code": 200,
-  "response": {
-    "code": 200,
-    "error_data": null,
-    "status": "success",
-    "data": [
-      {
-        "id": "1153",
+  "metadata": {
+    "page_size": 50,
+    "first_page_uri": "/v2/accounts/ameyo5m/trunks/trmum1a2b3c4d5e6f7890123456/whitelisted-ips?offset=0&page_size=50",
+    "prev_page_uri": null,
+    "next_page_uri": null
+  },
+  "response": [
+    {
+      "code": 200,
+      "error_data": null,
+      "status": "success",
+      "data": {
+        "id": "1154",
         "mask": 32,
         "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
-        "ip": "203.0.113.50",
+        "ip": "44.248.146.11",
         "friendly_name": null,
-        "date_created": "2026-01-23T10:15:00Z",
-        "date_updated": "2026-01-23T10:15:00Z"
+        "date_created": "2026-01-23T13:30:04Z",
+        "date_updated": "2026-01-23T13:30:04Z"
       }
-    ]
-  }
+    }
+  ]
 }
 ```
 
@@ -651,25 +798,60 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
 
 ```json
 {
-  "request_id": "a3b4c5d6-e7f8-9012-3456-789012345678",
+  "request_id": "bfc1544ab0ab4df3ae49173ccc744331",
   "method": "GET",
   "http_code": 200,
-  "response": {
-    "code": 200,
-    "error_data": null,
-    "status": "success",
-    "data": [
-      {
-        "id": "du_203011350_5061_001",
-        "destination": "sip:203.0.113.50:5061;transport=tls",
-        "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
-        "date_created": "2026-01-23T10:20:00Z",
-        "date_updated": "2026-01-23T10:20:00Z"
+  "metadata": {
+    "page_size": 50,
+    "first_page_uri": "/v2/accounts/ameyo5m/trunks/trmum1a2b3c4d5e6f7890123456/destination-uris?offset=0&page_size=50",
+    "prev_page_uri": null,
+    "next_page_uri": null
+  },
+  "response": [
+    {
+      "code": 200,
+      "error_data": null,
+      "status": "success",
+      "data": {
+        "id": "2544",
+        "destination": "sip:sip.mycompany.com:5061;transport=tls",
+        "date_created": "2026-01-23T13:39:06Z",
+        "date_updated": "2026-01-23T13:39:06Z",
+        "type": "public",
+        "priority": 0,
+        "weight": 1,
+        "trunk_sid": "trmum1a2b3c4d5e6f7890123456"
       }
-    ]
-  }
+    },
+    {
+      "code": 200,
+      "error_data": null,
+      "status": "success",
+      "data": {
+        "id": "2543",
+        "destination": "sip:44.248.146.11:5061;transport=tls",
+        "date_created": "2026-01-23T13:38:32Z",
+        "date_updated": "2026-01-23T13:38:32Z",
+        "type": "public",
+        "priority": 0,
+        "weight": 1,
+        "trunk_sid": "trmum1a2b3c4d5e6f7890123456"
+      }
+    }
+  ]
 }
 ```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | String | Unique destination URI identifier |
+| destination | String | SIP URI with transport |
+| type | String | Destination type (`public`) |
+| priority | Integer | Priority for routing (lower = higher priority) |
+| weight | Integer | Weight for load balancing |
+| trunk_sid | String | Associated trunk identifier |
 
 ---
 
@@ -706,9 +888,13 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
 
 ```json
 {
-  "request_id": "b4c5d6e7-f8a9-0123-4567-890123456789",
+  "request_id": "8ce98845365f43fd97c2f46df38438c6",
   "method": "POST",
   "http_code": 200,
+  "metadata": {
+    "total": 1,
+    "success": 1
+  },
   "response": [
     {
       "code": 200,
@@ -718,8 +904,8 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
         "name": "trunk_external_alias",
         "value": "+919876543210",
         "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
-        "date_created": "2026-01-23T10:25:00Z",
-        "date_updated": "2026-01-23T10:25:00Z"
+        "date_created": "2026-01-23T13:34:50Z",
+        "date_updated": "2026-01-23T13:34:50Z"
       }
     }
   ]
@@ -747,17 +933,31 @@ curl -X DELETE "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/acc
 
 ```json
 {
-  "request_id": "c5d6e7f8-a9b0-1234-5678-901234567890",
+  "request_id": "f708818c79f547b3aee31c4a480367a5",
   "method": "DELETE",
   "http_code": 200,
   "response": {
     "code": 200,
     "error_data": null,
     "status": "success",
-    "data": null
+    "data": {
+      "trunk_name": "my_trunk1234",
+      "date_created": "2026-01-23T13:25:39Z",
+      "date_updated": "2026-01-23T13:25:39Z",
+      "trunk_sid": "trmum15f77c83605998cdb9d1a1n",
+      "status": "active",
+      "domain_name": "ameyo5m.pstn.exotel.com",
+      "auth_type": "IP-WHITELIST",
+      "registration_enabled": "disabled",
+      "edge_preference": "auto",
+      "nso_code": "ANY-ANY",
+      "secure_trunking": "disabled"
+    }
   }
 }
 ```
+
+> **Note:** The delete response returns the full trunk data of the deleted trunk.
 
 ---
 
@@ -766,11 +966,13 @@ curl -X DELETE "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/acc
 | Code | Status | Description |
 |------|--------|-------------|
 | 200 | OK | Request successful |
+| 207 | Multi-Status | Partial success (check individual responses) |
 | 400 | Bad Request | Invalid parameters or malformed request |
 | 401 | Unauthorized | Invalid or missing credentials |
 | 403 | Forbidden | Access denied |
 | 404 | Not Found | Resource does not exist |
-| 409 | Conflict | Resource already exists |
+| 409 | Conflict | Resource already exists (duplicate) |
+| 415 | Unsupported Media Type | Wrong Content-Type (use application/json) |
 | 422 | Unprocessable Entity | Validation failed |
 | 429 | Too Many Requests | Rate limit exceeded (200/min) |
 | 500 | Internal Server Error | Server error |
@@ -781,12 +983,13 @@ curl -X DELETE "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/acc
 
 | Code | HTTP | Message | Description | Resolution |
 |------|------|---------|-------------|------------|
-| 1000 | 400 | Invalid request | Missing or invalid required field | Check request body |
-| 1001 | 400 | Invalid parameter | Parameter value is not valid | Verify parameter format |
-| 1002 | 409 | Resource exists | Trunk or phone number already exists | Use different name/number |
-| 1003 | 404 | Resource not found | Trunk SID does not exist | Verify trunk_sid |
+| 1000 | 404 | Not Found | Resource not found or invalid body | Check URL and request body |
+| 1001 | 400 | Invalid parameter / Mandatory Parameter missing | Parameter missing or invalid | Verify all required parameters |
+| 1002 | 400 | Invalid parameter | Destination not valid or not whitelisted | Use valid IP/FQDN, whitelist IP first |
+| 1007 | 400 | Invalid request body | JSON parsing failed | Check JSON syntax |
+| 1008 | 409 | Duplicate resource | IP or phone number already exists | Use different IP/number or delete existing |
+| 1011 | 415 | Unsupported content type | Wrong Content-Type header | Use `Content-Type: application/json` |
 | 1010 | 401 | Authorization failed | Invalid API key or token | Check credentials |
-| 1011 | 403 | Access denied | No permission for resource | Contact support |
 | 1020 | 422 | Validation error | Request validation failed | Check all parameters |
 | 1030 | 429 | Rate limit exceeded | Too many requests | Wait and retry |
 

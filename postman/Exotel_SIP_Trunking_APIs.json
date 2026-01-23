@@ -176,7 +176,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"destinations\": [\n    {\n      \"destination\": \"203.0.113.50:5061;transport=tls\"\n    }\n  ]\n}",
+              "raw": "{\n  \"destinations\": [\n    {\n      \"destination\": \"YOUR_SERVER_IP:5061;transport=tls\"\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -189,7 +189,7 @@
               "host": ["api", "in", "exotel", "com"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "destination-uris"]
             },
-            "description": "## Configure Call Routing Destination\n\nSpecifies where incoming calls should be routed.\n\n### Request Body\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| destinations | array | Yes | Array of destination objects |\n| destinations[].destination | string | Yes | Format: `ip:port;transport=tls` or `ip:port;transport=tcp` |\n\n### Examples\n- **IP with TLS:** `203.0.113.50:5061;transport=tls`\n- **IP with TCP:** `203.0.113.50:5060;transport=tcp`\n- **FQDN:** `sip.mycompany.com:5061;transport=tls`"
+            "description": "## Configure Call Routing Destination\n\nSpecifies where incoming calls should be routed.\n\n### ⚠️ IMPORTANT\n1. **For IP addresses:** You MUST whitelist the IP first using the Whitelist IP API, otherwise you'll get error: `Destination not whitelisted`\n2. **For FQDNs:** No whitelisting required\n3. Use your REAL server IP address, not example IPs\n\n### Request Body\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| destinations | array | Yes | Array of destination objects |\n| destinations[].destination | string | Yes | Format: `ip:port;transport=tls` or `ip:port;transport=tcp` |\n\n### Examples\n- **IP with TLS:** `44.248.146.11:5061;transport=tls` (whitelist first!)\n- **FQDN:** `sip.mycompany.com:5061;transport=tls` (no whitelist needed)"
           }
         }
       ]
