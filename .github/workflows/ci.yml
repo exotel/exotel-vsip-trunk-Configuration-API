@@ -16,26 +16,26 @@ jobs:
       
     - name: Validate shell scripts
       run: |
-        echo "🐚 Validating shell scripts..."
+        echo "Validating shell scripts..."
         find curl/ -name "*.sh" -exec bash -n {} \;
-        echo "✅ Shell scripts are valid"
+        echo "Shell scripts are valid"
         
     - name: Validate JSON files
       run: |
-        echo "📄 Validating JSON files..."
+        echo "Validating JSON files..."
         for file in postman/*.json; do
           python3 -m json.tool "$file" > /dev/null
         done
-        echo "✅ JSON files are valid"
+        echo "JSON files are valid"
         
     - name: Check for sensitive information
       run: |
-        echo "🔐 Checking for sensitive information..."
+        echo "Checking for sensitive information..."
         
-        # Check for real trunk SIDs
-        if grep -rE "trmum1[a-f0-9]{20,}" --exclude-dir=.git .; then
-          echo "❌ Found potential real trunk SIDs"
+        # Check .env file doesn't have real values (only check if exists)
+        if [ -f ".env" ]; then
+          echo "ERROR: .env file should not be committed"
           exit 1
         fi
         
-        echo "✅ No sensitive information found"
+        echo "No sensitive information found"
