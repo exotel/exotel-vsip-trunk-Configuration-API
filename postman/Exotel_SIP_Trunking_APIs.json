@@ -242,7 +242,7 @@
               "host": ["api", "in", "exotel", "com"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "settings"]
             },
-            "description": "Sets the external caller ID shown on outbound calls."
+            "description": "Sets the Caller ID shown to the called party on outbound calls.\n\n**Required for:** Outbound/Termination\n**Not applicable for:** Inbound/Origination (you want to see the real caller's number)\n\n**Value:** Your Exophone in E.164 format"
           }
         },
         {

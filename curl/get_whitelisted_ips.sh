@@ -15,3 +15,4 @@ if [ -f "../.env" ]; then source ../.env; elif [ -f ".env" ]; then source .env; 
 
 curl -X GET "https://${your_api_key}:${your_api_token}@${subdomain}/v2/accounts/${your_sid}/trunks/${trunk_sid}/whitelisted-ips" \
   -H "Content-Type: application/json"
+ 

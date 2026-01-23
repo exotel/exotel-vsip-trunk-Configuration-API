@@ -55,7 +55,7 @@ CUSTOMER PHONE ──> PSTN ──> EXOTEL ──> YOUR SYSTEM
 Your system connects to Voice AI bots via WebSocket.
 
 ```
-YOUR SYSTEM ──> EXOTEL ──> VOICE AI BOT (WebSocket)
+YOUR SYSTEM ──> EXOTEL ──> VOICE AI BOT (WebSocket) configured in App Bazaar flow with VoiceBot Applet
 ```
 
 - Calls route to AI voicebot
