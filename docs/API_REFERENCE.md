@@ -440,6 +440,7 @@ The destination can be an IP address or FQDN (Fully Qualified Domain Name) of yo
 - **For IP-based destinations:** You MUST whitelist the IP using the "Map ACL to Trunk" API first
 - **For FQDN-based destinations:** No whitelisting required (e.g., `sip.yourcompany.com`)
 - The destination format is: `<ip_or_fqdn>:<port>;transport=<protocol>`
+- You need to set
 
 ### HTTP Request
 
@@ -604,6 +605,16 @@ This error occurs when you try to add an IP-based destination that hasn't been w
 }
 ```
 
+###for Inbound SIP 
+a. Create a Flow using Connect Applet in App Bazaar: https://my.in.exotel.com/apps
+
+b. Use sip:<TrunkID> in the Dial Whom field
+
+c. Map DID to flow through Exophone: https://my.in.exotel.com/numbers
+
+d. Check inbound call flow by dialling Exophone/phonenumber to your system via Exotel SIP trunking
+
+
 ---
 
 # STREAMKIT SETUP (Voice AI)
@@ -664,6 +675,17 @@ curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<y
 ## StreamKit: Map ACL to Trunk
 
 Same as PSTN setup. Refer to [Map ACL to Trunk](#3-map-acl-to-trunk-whitelist-ip) above.
+
+Build Flow and Map DID
+
+a. Follow https://docs.exotel.com/exotel-agentstream/streamkit-cloud for end-to-end steps
+
+b. Create flow in AppBazaar with Voicebot applet and passthru applet: https://my.in.exotel.com/apps
+
+c. Procure SIP exophone or contact support
+
+d. Map DID to flow through Exophone: https://my.in.exotel.com/numbers
+
 
 ---
 
