@@ -7,8 +7,9 @@ Connect your PBX, Contact Center, or Voice AI system to the telephone network.
 ## Quick Start
 
 ### 1. Get Your Credentials
-
-From Exotel Dashboard → API Credentials:
+SignUp: https://my.in.exotel.com/auth/register
+Complete KYC as per compliance: https://docs.exotel.com/business-phone-system/kyc-verification
+Exotel Dashboard → API Credentials:https://my.in.exotel.com/apisettings/site#api-credentials
 - **API Key** (username)
 - **API Token** (password)
 - **Account SID**
@@ -76,6 +77,10 @@ curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<y
     ]
   }'
 ```
+### Step 5: for Inbound SIP 
+a. Create a Flow using Connect Applet in App Bazaar: https://my.in.exotel.com/apps
+b. Use sip:<TrunkID> in the Dial Whom field
+c. Map DID to flow through Exophone: https://my.in.exotel.com/numbers
 
 ---
 
@@ -103,6 +108,11 @@ curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<y
 ### Step 3: Map ACL to Trunk
 
 Same as PSTN Step 3.
+
+### Step 4: Build FLow nd Map DID
+a. Follow https://docs.exotel.com/exotel-agentstream/streamkit-cloud for end-to-end steps
+b.Create flow in AppBazaar
+b. Map DID to flow
 
 ---
 
