@@ -4,6 +4,21 @@
     "description": "SIP Trunking APIs for connecting your PBX, Contact Center, or Voice AI system to the telephone network.\n\n## Setup\n1. Set collection variables (api_key, api_token, account_sid)\n2. Follow the numbered steps in each folder\n\n## Folders\n- **GETTING STARTED (PSTN)**: Standard telephone network setup\n- **STREAMKIT (Voice AI)**: Voice AI bot integration\n- **MANAGE & VIEW**: View and manage configurations",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "username",
+        "value": "{{api_key}}",
+        "type": "string"
+      },
+      {
+        "key": "password",
+        "value": "{{api_token}}",
+        "type": "string"
+      }
+    ]
+  },
   "variable": [
     {
       "key": "api_key",
@@ -56,9 +71,9 @@
               "raw": "{\n  \"trunk_name\": \"my_trunk\",\n  \"nso_code\": \"ANY-ANY\",\n  \"domain_name\": \"{{account_sid}}.pstn.exotel.com\"\n}"
             },
             "url": {
-              "raw": "https://{{api_key}}:{{api_token}}@{{subdomain}}/v2/accounts/{{account_sid}}/trunks",
+              "raw": "https://{{subdomain}}/v2/accounts/{{account_sid}}/trunks",
               "protocol": "https",
-              "host": ["{{api_key}}:{{api_token}}@{{subdomain}}"],
+              "host": ["{{subdomain}}"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks"]
             },
             "description": "Creates a new SIP trunk.\n\n**Important:** Save the `trunk_sid` from the response - needed for all subsequent API calls.\n\n**Parameters:**\n- `trunk_name`: Unique name (max 16 chars, alphanumeric + underscore)\n- `nso_code`: Use `ANY-ANY`\n- `domain_name`: Format: `{account_sid}.pstn.exotel.com`"
@@ -79,9 +94,9 @@
               "raw": "{\n  \"phone_number\": \"+919876543210\"\n}"
             },
             "url": {
-              "raw": "https://{{api_key}}:{{api_token}}@{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/phone-numbers",
+              "raw": "https://{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/phone-numbers",
               "protocol": "https",
-              "host": ["{{api_key}}:{{api_token}}@{{subdomain}}"],
+              "host": ["{{subdomain}}"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "phone-numbers"]
             },
             "description": "Maps a phone number (DID/ExoPhone) to the trunk.\n\n**Important:** Save the `id` from the response - needed for Update Phone Number Mode API.\n\n**Parameters:**\n- `phone_number`: E.164 format (e.g., +919876543210)\n- `mode`: Optional. Use `pstn` (default) or `flow` (for StreamKit)"
@@ -102,9 +117,9 @@
               "raw": "{\n  \"ip\": \"YOUR_SERVER_IP\",\n  \"mask\": 32\n}"
             },
             "url": {
-              "raw": "https://{{api_key}}:{{api_token}}@{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/whitelisted-ips",
+              "raw": "https://{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/whitelisted-ips",
               "protocol": "https",
-              "host": ["{{api_key}}:{{api_token}}@{{subdomain}}"],
+              "host": ["{{subdomain}}"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "whitelisted-ips"]
             },
             "description": "Whitelists your server's public IP for authentication.\n\n**Required for:** Outbound/Termination calls\n\n**Note:** If using IP for destination URI, whitelist it here first!\n\n**Parameters:**\n- `ip`: Your server's public IP address\n- `mask`: Subnet mask (32 = single IP, 24 = /24 subnet)"
@@ -125,9 +140,9 @@
               "raw": "{\n  \"destinations\": [\n    {\n      \"destination\": \"YOUR_SERVER_IP:5061;transport=tls\"\n    }\n  ]\n}"
             },
             "url": {
-              "raw": "https://{{api_key}}:{{api_token}}@{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/destination-uris",
+              "raw": "https://{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/destination-uris",
               "protocol": "https",
-              "host": ["{{api_key}}:{{api_token}}@{{subdomain}}"],
+              "host": ["{{subdomain}}"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "destination-uris"]
             },
             "description": "Configures where incoming calls are routed.\n\n**Required for:** Inbound/Origination calls\n\n**⚠️ Important:**\n- For IP destinations: Whitelist the IP first (Step 3)\n- For FQDN destinations: No whitelisting needed\n\n**Parameters:**\n- `destination`: Format `<ip_or_fqdn>:<port>;transport=<tls|tcp>`\n\n**Examples:**\n- IP: `44.248.146.11:5061;transport=tls`\n- FQDN: `sip.company.com:5061;transport=tls`"
@@ -154,9 +169,9 @@
               "raw": "{\n  \"trunk_name\": \"streamkit_trunk\",\n  \"nso_code\": \"ANY-ANY\",\n  \"domain_name\": \"{{account_sid}}.pstn.exotel.com\"\n}"
             },
             "url": {
-              "raw": "https://{{api_key}}:{{api_token}}@{{subdomain}}/v2/accounts/{{account_sid}}/trunks",
+              "raw": "https://{{subdomain}}/v2/accounts/{{account_sid}}/trunks",
               "protocol": "https",
-              "host": ["{{api_key}}:{{api_token}}@{{subdomain}}"],
+              "host": ["{{subdomain}}"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks"]
             },
             "description": "Creates a new SIP trunk for StreamKit.\n\n**Important:** Save the `trunk_sid` from the response."
@@ -177,9 +192,9 @@
               "raw": "{\n  \"phone_number\": \"+919876543210\",\n  \"mode\": \"flow\"\n}"
             },
             "url": {
-              "raw": "https://{{api_key}}:{{api_token}}@{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/phone-numbers",
+              "raw": "https://{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/phone-numbers",
               "protocol": "https",
-              "host": ["{{api_key}}:{{api_token}}@{{subdomain}}"],
+              "host": ["{{subdomain}}"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "phone-numbers"]
             },
             "description": "Maps a phone number with flow mode for Voice AI routing.\n\n**Important:** `mode: flow` routes calls to Voice AI bot instead of PSTN.\n\n**Parameters:**\n- `phone_number`: E.164 format\n- `mode`: Must be `flow` for StreamKit"
@@ -200,9 +215,9 @@
               "raw": "{\n  \"ip\": \"YOUR_SERVER_IP\",\n  \"mask\": 32\n}"
             },
             "url": {
-              "raw": "https://{{api_key}}:{{api_token}}@{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/whitelisted-ips",
+              "raw": "https://{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/whitelisted-ips",
               "protocol": "https",
-              "host": ["{{api_key}}:{{api_token}}@{{subdomain}}"],
+              "host": ["{{subdomain}}"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "whitelisted-ips"]
             },
             "description": "Whitelists your server's public IP.\n\n**Parameters:**\n- `ip`: Your server's public IP address\n- `mask`: 32 for single IP"
@@ -219,9 +234,9 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "https://{{api_key}}:{{api_token}}@{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/phone-numbers",
+              "raw": "https://{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/phone-numbers",
               "protocol": "https",
-              "host": ["{{api_key}}:{{api_token}}@{{subdomain}}"],
+              "host": ["{{subdomain}}"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "phone-numbers"]
             },
             "description": "Lists all phone numbers mapped to the trunk."
@@ -232,9 +247,9 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "https://{{api_key}}:{{api_token}}@{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/whitelisted-ips",
+              "raw": "https://{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/whitelisted-ips",
               "protocol": "https",
-              "host": ["{{api_key}}:{{api_token}}@{{subdomain}}"],
+              "host": ["{{subdomain}}"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "whitelisted-ips"]
             },
             "description": "Lists all whitelisted IP addresses for the trunk."
@@ -245,9 +260,9 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "https://{{api_key}}:{{api_token}}@{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/destination-uris",
+              "raw": "https://{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/destination-uris",
               "protocol": "https",
-              "host": ["{{api_key}}:{{api_token}}@{{subdomain}}"],
+              "host": ["{{subdomain}}"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "destination-uris"]
             },
             "description": "Lists all destination URIs configured for the trunk."
@@ -268,9 +283,9 @@
               "raw": "{\n  \"phone_number\": \"+919876543210\",\n  \"mode\": \"flow\"\n}"
             },
             "url": {
-              "raw": "https://{{api_key}}:{{api_token}}@{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/phone-numbers/{{phone_number_id}}",
+              "raw": "https://{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/phone-numbers/{{phone_number_id}}",
               "protocol": "https",
-              "host": ["{{api_key}}:{{api_token}}@{{subdomain}}"],
+              "host": ["{{subdomain}}"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "phone-numbers", "{{phone_number_id}}"]
             },
             "description": "Updates the routing mode for a mapped phone number.\n\n**⚠️ Important:** Use the numeric `id` from Map Phone Number response, NOT the phone number!\n\nExample: If response had `\"id\": \"41523\"`, use `41523` in the URL.\n\n**Mode Options:**\n- `pstn`: Route to telephone network\n- `flow`: Route to Voice AI bot (StreamKit)"
@@ -291,9 +306,9 @@
               "raw": "{\n  \"settings\": [\n    {\n      \"name\": \"trunk_external_alias\",\n      \"value\": \"+919876543210\"\n    }\n  ]\n}"
             },
             "url": {
-              "raw": "https://{{api_key}}:{{api_token}}@{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/settings",
+              "raw": "https://{{subdomain}}/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/settings",
               "protocol": "https",
-              "host": ["{{api_key}}:{{api_token}}@{{subdomain}}"],
+              "host": ["{{subdomain}}"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "settings"]
             },
             "description": "Sets the outbound caller ID displayed to called parties.\n\n**Parameters:**\n- `name`: Use `trunk_external_alias`\n- `value`: Phone number in E.164 format"
@@ -304,9 +319,9 @@
           "request": {
             "method": "DELETE",
             "url": {
-              "raw": "https://{{api_key}}:{{api_token}}@{{subdomain}}/v2/accounts/{{account_sid}}/trunks?trunk_sid={{trunk_sid}}",
+              "raw": "https://{{subdomain}}/v2/accounts/{{account_sid}}/trunks?trunk_sid={{trunk_sid}}",
               "protocol": "https",
-              "host": ["{{api_key}}:{{api_token}}@{{subdomain}}"],
+              "host": ["{{subdomain}}"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks"],
               "query": [
                 {
