@@ -210,9 +210,13 @@ For detailed API documentation with request/response examples, see [API Referenc
 ##Rule of Thumb
 
 • Outbound (SIP → PSTN): Always whitelist your source IP
+
 • Inbound (PSTN → SIP):
+
   – Using FQDN destination → No whitelist required
+  
   – Using IP destination → Destination IP must be allowlisted
+  
 • StreamKit: Always whitelist your source IP
 
 ## Support
