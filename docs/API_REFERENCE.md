@@ -297,10 +297,18 @@ Switch an existing phone number between PSTN and Flow mode.
 
 **Endpoint:**
 ```
-PUT /v2/accounts/{account_sid}/trunks/{trunk_sid}/phone-numbers/{phone_number_id}
+PUT /v2/accounts/{account_sid}/trunks/{trunk_sid}/phone-numbers/{id}
 ```
 
-### Request Parameters
+> **Note:** The `{id}` is the numeric ID returned when you mapped the phone number (e.g., `41523`), NOT the phone number itself.
+
+### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| id | String | Yes | The numeric ID returned from Map Phone Number API (e.g., `41523`) |
+
+### Request Body Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -310,10 +318,10 @@ PUT /v2/accounts/{account_sid}/trunks/{trunk_sid}/phone-numbers/{phone_number_id
 ### Example Request (Switch to Flow Mode)
 
 ```bash
-curl -X PUT "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/phone-numbers/pn_9876543210_001" \
+curl -X PUT "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/phone-numbers/41523" \
   -H "Content-Type: application/json" \
   -d '{
-    "phone_number": "+919876543210",
+    "phone_number": "+918040264208",
     "mode": "flow"
   }'
 ```
@@ -321,10 +329,10 @@ curl -X PUT "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
 ### Example Request (Switch to PSTN Mode)
 
 ```bash
-curl -X PUT "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/phone-numbers/pn_9876543210_001" \
+curl -X PUT "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/phone-numbers/41523" \
   -H "Content-Type: application/json" \
   -d '{
-    "phone_number": "+919876543210",
+    "phone_number": "+918040264208",
     "mode": "pstn"
   }'
 ```
@@ -333,7 +341,7 @@ curl -X PUT "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
 
 ```json
 {
-  "request_id": "f6a7b8c9-d0e1-2345-f678-901234567890",
+  "request_id": "c719cd56eb5943e789e1bdbd4ce1515a",
   "method": "PUT",
   "http_code": 200,
   "response": {
@@ -341,11 +349,11 @@ curl -X PUT "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
     "error_data": null,
     "status": "success",
     "data": {
-      "id": "41512",
-      "phone_number": "+919876543210",
-      "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
-      "date_created": "2026-01-23T10:26:54Z",
-      "date_updated": "2026-01-23T10:30:00Z",
+      "id": "41523",
+      "phone_number": "+918040264208",
+      "trunk_sid": "trmum15f77c83605998cdb9d1a1n",
+      "date_created": "2026-01-23T13:28:11Z",
+      "date_updated": "2026-01-23T13:41:59Z",
       "mode": "flow"
     }
   }
