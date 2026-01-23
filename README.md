@@ -7,9 +7,9 @@ Connect your PBX, Contact Center, or Voice AI system to the telephone network.
 ## Quick Start
 
 ### 1. Get Your Credentials
-SignUp: https://my.in.exotel.com/auth/register
-Complete KYC as per compliance: https://docs.exotel.com/business-phone-system/kyc-verification
-Exotel Dashboard → API Credentials:https://my.in.exotel.com/apisettings/site#api-credentials
+##SignUp: https://my.in.exotel.com/auth/register
+##Complete KYC as per compliance: https://docs.exotel.com/business-phone-system/kyc-verification
+##Exotel Dashboard → API Credentials:https://my.in.exotel.com/apisettings/site#api-credentials
 - **API Key** (username)
 - **API Token** (password)
 - **Account SID**
