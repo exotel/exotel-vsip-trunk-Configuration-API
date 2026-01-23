@@ -91,6 +91,8 @@ b. Use sip:<TrunkID> in the Dial Whom field
 
 c. Map DID to flow through Exophone: https://my.in.exotel.com/numbers
 
+d. Check inbound call flow by dialling Exophone/phonenumber to your system via Exotel SIP trunking
+
 ---
 
 ## StreamKit Setup (Voice AI)
@@ -118,11 +120,11 @@ curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<y
 
 Same as PSTN Step 3.
 
-### Step 4: Build FLow nd Map DID
+### Step 4: Build Flow and Map DID
 
 a. Follow https://docs.exotel.com/exotel-agentstream/streamkit-cloud for end-to-end steps
 
-b. Create flow in AppBazaar with Voicebot applet https://my.in.exotel.com/apps
+b. Create flow in AppBazaar with Voicebot applet and passthru applet: https://my.in.exotel.com/apps
 
 b. Map DID to flow through Exophone: https://my.in.exotel.com/numbers
 
