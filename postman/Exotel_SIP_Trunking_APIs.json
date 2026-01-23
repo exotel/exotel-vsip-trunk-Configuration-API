@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Exotel SIP Trunking APIs",
-    "description": "Connect your PBX or Contact Center to the telephone network.\n\n**Setup:**\n1. Set Authorization: Basic Auth (API Key + Token)\n2. Replace placeholders in URL\n3. Fill form-data parameters\n\n**Base URL:** https://api.in.exotel.com",
+    "description": "Connect your PBX or Contact Center to the telephone network.\n\n## Quick Start\n1. **Set Variables**: Edit collection variables (account_sid, api_key, api_token)\n2. **Create Trunk**: Run the first API to create a trunk\n3. **Choose Use Case**: Follow OUTBOUND, INBOUND, or STREAMKIT folder\n\n## Authentication\nBasic Auth with API Key and Token (pre-configured)\n\n## Base URL\nhttps://api.in.exotel.com",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -13,42 +13,55 @@
   },
   "item": [
     {
-      "name": "1. Create Trunk",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "formdata",
-          "formdata": [
-            {"key": "trunk_name", "value": "my_trunk", "description": "Unique name (max 16 chars, alphanumeric + underscore)", "type": "text"},
-            {"key": "nso_code", "value": "ANY-ANY", "description": "Default: ANY-ANY", "type": "text"},
-            {"key": "domain_name", "value": "{{account_sid}}.pstn.exotel.com", "description": "Format: {account_sid}.pstn.exotel.com", "type": "text"}
-          ]
-        },
-        "url": {
-          "raw": "https://api.in.exotel.com/v2/accounts/{{account_sid}}/trunks",
-          "protocol": "https",
-          "host": ["api", "in", "exotel", "com"],
-          "path": ["v2", "accounts", "{{account_sid}}", "trunks"]
-        },
-        "description": "Creates a new SIP trunk. Required for all use cases.\n\n**Save trunk_sid from response for subsequent APIs.**"
-      }
-    },
-    {
-      "name": "OUTBOUND / TERMINATION",
-      "description": "Make calls from your system to phone numbers (PSTN).\n\n**Requirements:** Static public IP",
+      "name": "1. GETTING STARTED",
+      "description": "**START HERE** - Create a trunk first before using any other APIs.",
       "item": [
         {
-          "name": "2a. Map Phone Number (PSTN)",
+          "name": "Create Trunk",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
             "body": {
-              "mode": "formdata",
-              "formdata": [
-                {"key": "phone_number", "value": "", "description": "Your Exophone in E.164 format (e.g., +919876543210)", "type": "text"},
-                {"key": "mode", "value": "pstn", "description": "Default: pstn (routes to telephone network)", "type": "text"}
-              ]
+              "mode": "raw",
+              "raw": "{\n  \"trunk_name\": \"my_trunk\",\n  \"nso_code\": \"ANY-ANY\",\n  \"domain_name\": \"{{account_sid}}.pstn.exotel.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.in.exotel.com/v2/accounts/{{account_sid}}/trunks",
+              "protocol": "https",
+              "host": ["api", "in", "exotel", "com"],
+              "path": ["v2", "accounts", "{{account_sid}}", "trunks"]
+            },
+            "description": "## Create a new SIP trunk\n\n**This is the first step for ALL use cases.**\n\n### Request Body\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| trunk_name | string | Yes | Unique name (max 16 chars, alphanumeric + underscore) |\n| nso_code | string | Yes | Network service operator code. Use `ANY-ANY` |\n| domain_name | string | Yes | Format: `{account_sid}.pstn.exotel.com` |\n\n### After Success\n**Save the `trunk_sid` from the response** - you'll need it for all subsequent APIs.\n\n### Example Response\n```json\n{\n  \"response\": {\n    \"status\": \"success\",\n    \"data\": {\n      \"trunk_sid\": \"trmum1a2b3c4d5e6f7890123456\",\n      \"trunk_name\": \"my_trunk\",\n      \"status\": \"active\"\n    }\n  }\n}\n```"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. OUTBOUND (Termination)",
+      "description": "**Use Case:** Make calls FROM your PBX/Contact Center TO phone numbers (PSTN)\n\n**Requirements:**\n- Static public IP address\n- Exophone (phone number)\n\n**Steps:**\n1. Map Phone Number\n2. Whitelist your IP\n3. Get Credentials\n4. Configure your PBX",
+      "item": [
+        {
+          "name": "Step 1: Map Phone Number",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"+919876543210\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "https://api.in.exotel.com/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/phone-numbers",
@@ -56,20 +69,24 @@
               "host": ["api", "in", "exotel", "com"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "phone-numbers"]
             },
-            "description": "Associates phone number with trunk for outbound calls."
+            "description": "## Map Exophone to Trunk\n\nAssociates your Exophone with the trunk for outbound calls.\n\n### Request Body\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| phone_number | string | Yes | Your Exophone in E.164 format (e.g., +919876543210) |\n\n### Note\nFor outbound calls, `mode` defaults to `pstn` (can be omitted)."
           }
         },
         {
-          "name": "3a. Whitelist IP",
+          "name": "Step 2: Whitelist IP",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
             "body": {
-              "mode": "formdata",
-              "formdata": [
-                {"key": "ip", "value": "", "description": "Your server's public IPv4 address", "type": "text"},
-                {"key": "mask", "value": "32", "description": "Default: 32 (single IP). Use 24 for /24 subnet", "type": "text"}
-              ]
+              "mode": "raw",
+              "raw": "{\n  \"ip\": \"203.0.113.50\",\n  \"mask\": 32\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "https://api.in.exotel.com/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/whitelisted-ips",
@@ -77,11 +94,11 @@
               "host": ["api", "in", "exotel", "com"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "whitelisted-ips"]
             },
-            "description": "Registers your server IP for authentication. Required for outbound calls."
+            "description": "## Whitelist Your Server IP\n\nRegisters your server's public IP for authentication.\n\n### Request Body\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| ip | string | Yes | Your server's public IPv4 address |\n| mask | integer | Yes | Subnet mask. Use `32` for single IP, `24` for /24 subnet |"
           }
         },
         {
-          "name": "4a. Get Credentials",
+          "name": "Step 3: Get Credentials",
           "request": {
             "method": "GET",
             "header": [],
@@ -91,150 +108,24 @@
               "host": ["api", "in", "exotel", "com"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "credentials"]
             },
-            "description": "Gets SIP username and password for your PBX configuration.\n\n**Use in PBX:**\n- SIP Server: {account_sid}.pstn.exotel.com\n- Port: 5060 (TCP) or 5061 (TLS)\n- Username: trunk_sid\n- Password: from response"
-          }
-        }
-      ]
-    },
-    {
-      "name": "INBOUND / ORIGINATION",
-      "description": "Receive calls from phone numbers to your system.\n\n**Requirements:** Static IP or FQDN",
-      "item": [
-        {
-          "name": "2b. Map Phone Number",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {"key": "phone_number", "value": "", "description": "Phone number customers will dial (E.164 format)", "type": "text"}
-              ]
-            },
-            "url": {
-              "raw": "https://api.in.exotel.com/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/phone-numbers",
-              "protocol": "https",
-              "host": ["api", "in", "exotel", "com"],
-              "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "phone-numbers"]
-            },
-            "description": "Associates phone number with trunk for inbound routing."
+            "description": "## Get SIP Credentials\n\nRetrieves username and password for your PBX configuration.\n\n### PBX Configuration\n| Setting | Value |\n|---------|-------|\n| SIP Server | `{account_sid}.pstn.exotel.com` |\n| Port | `5060` (TCP) or `5061` (TLS) |\n| Username | `trunk_sid` (from response) |\n| Password | From response |"
           }
         },
         {
-          "name": "3b. Add Destination URI",
+          "name": "Optional: Set Caller ID",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"destinations\": [\n    {\"destination\": \"your_server:5061;transport=tls\"}\n  ]\n}"
-            },
-            "url": {
-              "raw": "https://api.in.exotel.com/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/destination-uris",
-              "protocol": "https",
-              "host": ["api", "in", "exotel", "com"],
-              "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "destination-uris"]
-            },
-            "description": "Where incoming calls are routed.\n\n**Format:** ip:port;transport=tls (or tcp)\n\n**Supports:** IP address or FQDN\n\n**Default port:** 5061 (TLS), 5060 (TCP)"
-          }
-        }
-      ]
-    },
-    {
-      "name": "STREAMKIT",
-      "description": "Connect your Contact Center to Voice AI bots.\n\n**Requirements:** Static public IP\n**Mode:** flow (routes to Voice AI instead of PSTN)",
-      "item": [
-        {
-          "name": "2c. Map Phone Number (Flow)",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {"key": "phone_number", "value": "", "description": "Your Exophone in E.164 format", "type": "text"},
-                {"key": "mode", "value": "flow", "description": "flow = routes to Voice AI bot (via App Bazaar)", "type": "text"}
-              ]
-            },
-            "url": {
-              "raw": "https://api.in.exotel.com/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/phone-numbers",
-              "protocol": "https",
-              "host": ["api", "in", "exotel", "com"],
-              "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "phone-numbers"]
-            },
-            "description": "Associates phone number with Voice AI routing.\n\nmode=flow routes calls to your Voice AI bot configured in App Bazaar."
-          }
-        },
-        {
-          "name": "3c. Whitelist IP",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {"key": "ip", "value": "", "description": "Your server's public IPv4 address", "type": "text"},
-                {"key": "mask", "value": "32", "description": "Default: 32", "type": "text"}
-              ]
-            },
-            "url": {
-              "raw": "https://api.in.exotel.com/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/whitelisted-ips",
-              "protocol": "https",
-              "host": ["api", "in", "exotel", "com"],
-              "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "whitelisted-ips"]
-            },
-            "description": "Registers your server IP for StreamKit authentication."
-          }
-        },
-        {
-          "name": "4c. Get Credentials",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "https://api.in.exotel.com/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/credentials",
-              "protocol": "https",
-              "host": ["api", "in", "exotel", "com"],
-              "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "credentials"]
-            },
-            "description": "Gets SIP credentials for StreamKit configuration."
-          }
-        }
-      ]
-    },
-    {
-      "name": "SETTINGS & DETAILS",
-      "description": "View, update, and manage trunk configurations.",
-      "item": [
-        {
-          "name": "Update Phone Number Mode",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {"key": "phone_number", "value": "", "description": "Phone number in E.164 format", "type": "text"},
-                {"key": "mode", "value": "flow", "description": "pstn = PSTN routing, flow = Voice AI routing", "type": "text"}
-              ]
-            },
-            "url": {
-              "raw": "https://api.in.exotel.com/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/phone-numbers/{{phone_number_id}}",
-              "protocol": "https",
-              "host": ["api", "in", "exotel", "com"],
-              "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "phone-numbers", "{{phone_number_id}}"]
-            },
-            "description": "Switch between PSTN and Flow mode.\n\n**Use cases:**\n- Switch from standard calls to Voice AI\n- Switch from Voice AI back to PSTN"
-          }
-        },
-        {
-          "name": "Set Trunk Alias (Caller ID)",
-          "request": {
-            "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"settings\": [\n    {\"name\": \"trunk_external_alias\", \"value\": \"+919876543210\"}\n  ]\n}"
+              "raw": "{\n  \"settings\": [\n    {\n      \"name\": \"trunk_external_alias\",\n      \"value\": \"+919876543210\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "https://api.in.exotel.com/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/settings",
@@ -242,9 +133,141 @@
               "host": ["api", "in", "exotel", "com"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "settings"]
             },
-            "description": "Sets the Caller ID shown to the called party on outbound calls.\n\n**Required for:** Outbound/Termination\n**Not applicable for:** Inbound/Origination (you want to see the real caller's number)\n\n**Value:** Your Exophone in E.164 format"
+            "description": "## Set Outbound Caller ID\n\nSets the phone number displayed to called parties.\n\n### Request Body\n| Parameter | Type | Description |\n|-----------|------|-------------|\n| settings[].name | string | Use `trunk_external_alias` |\n| settings[].value | string | Your Exophone in E.164 format |"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. INBOUND (Origination)",
+      "description": "**Use Case:** Receive calls FROM phone numbers TO your PBX/Contact Center\n\n**Requirements:**\n- Static IP address or FQDN\n- TLS certificate (recommended)\n\n**Steps:**\n1. Map Phone Number\n2. Add Destination URI",
+      "item": [
+        {
+          "name": "Step 1: Map Phone Number",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"+919876543210\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.in.exotel.com/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/phone-numbers",
+              "protocol": "https",
+              "host": ["api", "in", "exotel", "com"],
+              "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "phone-numbers"]
+            },
+            "description": "## Map Phone Number for Inbound\n\nAssociates the phone number that customers will call.\n\n### Request Body\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| phone_number | string | Yes | Phone number customers will dial (E.164 format) |"
           }
         },
+        {
+          "name": "Step 2: Add Destination URI",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"destinations\": [\n    {\n      \"destination\": \"203.0.113.50:5061;transport=tls\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.in.exotel.com/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/destination-uris",
+              "protocol": "https",
+              "host": ["api", "in", "exotel", "com"],
+              "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "destination-uris"]
+            },
+            "description": "## Configure Call Routing Destination\n\nSpecifies where incoming calls should be routed.\n\n### Request Body\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| destinations | array | Yes | Array of destination objects |\n| destinations[].destination | string | Yes | Format: `ip:port;transport=tls` or `ip:port;transport=tcp` |\n\n### Examples\n- **IP with TLS:** `203.0.113.50:5061;transport=tls`\n- **IP with TCP:** `203.0.113.50:5060;transport=tcp`\n- **FQDN:** `sip.mycompany.com:5061;transport=tls`"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. STREAMKIT (Voice AI)",
+      "description": "**Use Case:** Connect your Contact Center to Voice AI bots\n\n**Requirements:**\n- Static public IP address\n- Voice AI bot configured in App Bazaar\n\n**Steps:**\n1. Map Phone Number with `mode: flow`\n2. Whitelist your IP\n3. Get Credentials",
+      "item": [
+        {
+          "name": "Step 1: Map Phone Number (Flow Mode)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"+919876543210\",\n  \"mode\": \"flow\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.in.exotel.com/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/phone-numbers",
+              "protocol": "https",
+              "host": ["api", "in", "exotel", "com"],
+              "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "phone-numbers"]
+            },
+            "description": "## Map Phone Number for Voice AI\n\nAssociates phone number with Voice AI routing.\n\n### Request Body\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| phone_number | string | Yes | Your Exophone in E.164 format |\n| mode | string | Yes | Must be `flow` for Voice AI routing |\n\n### Important\n`mode: flow` routes calls to your Voice AI bot configured in App Bazaar instead of PSTN."
+          }
+        },
+        {
+          "name": "Step 2: Whitelist IP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ip\": \"203.0.113.50\",\n  \"mask\": 32\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.in.exotel.com/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/whitelisted-ips",
+              "protocol": "https",
+              "host": ["api", "in", "exotel", "com"],
+              "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "whitelisted-ips"]
+            },
+            "description": "## Whitelist Your Server IP\n\nRegisters your server's public IP for StreamKit authentication.\n\n### Request Body\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| ip | string | Yes | Your server's public IPv4 address |\n| mask | integer | Yes | Use `32` for single IP |"
+          }
+        },
+        {
+          "name": "Step 3: Get Credentials",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://api.in.exotel.com/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/credentials",
+              "protocol": "https",
+              "host": ["api", "in", "exotel", "com"],
+              "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "credentials"]
+            },
+            "description": "## Get SIP Credentials for StreamKit\n\nRetrieves username and password for StreamKit configuration."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. MANAGE & VIEW",
+      "description": "View and manage your trunk configurations.",
+      "item": [
         {
           "name": "Get Phone Numbers",
           "request": {
@@ -302,6 +325,31 @@
           }
         },
         {
+          "name": "Update Phone Number Mode",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"+919876543210\",\n  \"mode\": \"flow\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.in.exotel.com/v2/accounts/{{account_sid}}/trunks/{{trunk_sid}}/phone-numbers/{{phone_number_id}}",
+              "protocol": "https",
+              "host": ["api", "in", "exotel", "com"],
+              "path": ["v2", "accounts", "{{account_sid}}", "trunks", "{{trunk_sid}}", "phone-numbers", "{{phone_number_id}}"]
+            },
+            "description": "## Switch Between PSTN and Flow Mode\n\nUpdate an existing phone number's routing mode.\n\n### Request Body\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| phone_number | string | Yes | Phone number in E.164 format |\n| mode | string | Yes | `pstn` for PSTN routing, `flow` for Voice AI |"
+          }
+        },
+        {
           "name": "Delete Trunk",
           "request": {
             "method": "DELETE",
@@ -311,19 +359,21 @@
               "protocol": "https",
               "host": ["api", "in", "exotel", "com"],
               "path": ["v2", "accounts", "{{account_sid}}", "trunks"],
-              "query": [{"key": "trunk_sid", "value": "{{trunk_sid}}"}]
+              "query": [
+                {"key": "trunk_sid", "value": "{{trunk_sid}}"}
+              ]
             },
-            "description": "Permanently deletes trunk and all configurations.\n\n**Warning:** This cannot be undone."
+            "description": "## Delete Trunk\n\n**⚠️ Warning:** This permanently deletes the trunk and ALL configurations. This cannot be undone."
           }
         }
       ]
     }
   ],
   "variable": [
-    {"key": "account_sid", "value": "your_account_sid"},
-    {"key": "api_key", "value": "your_api_key"},
-    {"key": "api_token", "value": "your_api_token"},
-    {"key": "trunk_sid", "value": "your_trunk_sid"},
-    {"key": "phone_number_id", "value": "your_phone_number_id"}
+    {"key": "account_sid", "value": "your_account_sid", "type": "string"},
+    {"key": "api_key", "value": "your_api_key", "type": "string"},
+    {"key": "api_token", "value": "your_api_token", "type": "string"},
+    {"key": "trunk_sid", "value": "your_trunk_sid", "type": "string"},
+    {"key": "phone_number_id", "value": "your_phone_number_id", "type": "string"}
   ]
 }

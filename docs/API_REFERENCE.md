@@ -69,23 +69,53 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
 
 ```json
 {
-  "request_id": "f7e6d5c4-b3a2-1098-7654-321098765432",
+  "request_id": "10a67da360d446378d5c2b66407b7f18",
   "method": "POST",
   "http_code": 200,
   "response": {
-    "status": "success",
     "code": 200,
+    "error_data": null,
+    "status": "success",
     "data": {
-      "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
       "trunk_name": "outbound_trunk",
+      "date_created": "2026-01-23T09:24:59Z",
+      "date_updated": "2026-01-23T09:24:59Z",
+      "trunk_sid": "trmum1f708622631150902801a1n",
+      "status": "active",
       "domain_name": "exoteltest.pstn.exotel.com",
+      "auth_type": "IP-WHITELIST",
+      "registration_enabled": "disabled",
+      "edge_preference": "auto",
       "nso_code": "ANY-ANY",
-      "date_created": "2025-01-23T10:00:00Z",
-      "date_updated": "2025-01-23T10:00:00Z"
+      "secure_trunking": "disabled",
+      "destination_uris": "/v2/accounts/exoteltest/trunks/trmum1f708622631150902801a1n/destination-uris",
+      "whitelisted_ips": "/v2/accounts/exoteltest/trunks/trmum1f708622631150902801a1n/whitelisted-ips",
+      "credentials": "/v2/accounts/exoteltest/trunks/trmum1f708622631150902801a1n/credentials",
+      "phone_numbers": "/v2/accounts/exoteltest/trunks/trmum1f708622631150902801a1n/phone-numbers"
     }
   }
 }
 ```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| trunk_sid | String | Unique trunk identifier |
+| trunk_name | String | Name of the trunk |
+| domain_name | String | SIP domain for the trunk |
+| status | String | Trunk status (`active`, `inactive`) |
+| auth_type | String | Authentication type (`IP-WHITELIST`) |
+| registration_enabled | String | Registration status (`enabled`, `disabled`) |
+| edge_preference | String | Edge server preference (`auto`) |
+| nso_code | String | Network service operator code |
+| secure_trunking | String | Secure trunking status (`enabled`, `disabled`) |
+| destination_uris | String | API path to destination URIs |
+| whitelisted_ips | String | API path to whitelisted IPs |
+| credentials | String | API path to credentials |
+| phone_numbers | String | API path to phone numbers |
+| date_created | String | ISO 8601 timestamp |
+| date_updated | String | ISO 8601 timestamp |
 
 ### Error Response (400 Bad Request)
 
@@ -169,22 +199,35 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
 
 ```json
 {
-  "request_id": "c3d4e5f6-a7b8-9012-cdef-345678901234",
+  "request_id": "13ab9319cf574486ba299c364f82cade",
   "method": "POST",
   "http_code": 200,
   "response": {
-    "status": "success",
     "code": 200,
+    "error_data": null,
+    "status": "success",
     "data": {
-      "id": "pn_9876543210_001",
+      "id": "41512",
       "phone_number": "+919876543210",
-      "mode": "pstn",
       "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
-      "date_created": "2025-01-23T10:05:00Z"
+      "date_created": "2026-01-23T10:26:54Z",
+      "date_updated": "2026-01-23T10:26:54Z",
+      "mode": null
     }
   }
 }
 ```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | String | Unique phone number mapping identifier |
+| phone_number | String | Phone number in E.164 format |
+| trunk_sid | String | Associated trunk identifier |
+| mode | String | Routing mode (`pstn`, `flow`, or `null` if not specified) |
+| date_created | String | ISO 8601 timestamp |
+| date_updated | String | ISO 8601 timestamp |
 
 ### Error Response (404 Not Found)
 
@@ -272,14 +315,16 @@ curl -X PUT "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
   "method": "PUT",
   "http_code": 200,
   "response": {
-    "status": "success",
     "code": 200,
+    "error_data": null,
+    "status": "success",
     "data": {
-      "id": "pn_9876543210_001",
+      "id": "41512",
       "phone_number": "+919876543210",
-      "mode": "flow",
       "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
-      "date_updated": "2025-01-23T10:10:00Z"
+      "date_created": "2026-01-23T10:26:54Z",
+      "date_updated": "2026-01-23T10:30:00Z",
+      "mode": "flow"
     }
   }
 }
@@ -318,22 +363,37 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
 
 ```json
 {
-  "request_id": "a7b8c9d0-e1f2-3456-7890-abcdef123456",
+  "request_id": "3daaed4cd05d443f854e07e60dd4c008",
   "method": "POST",
   "http_code": 200,
   "response": {
-    "status": "success",
     "code": 200,
+    "error_data": null,
+    "status": "success",
     "data": {
-      "id": "wl_203011350_001",
-      "ip": "203.0.113.50",
+      "id": "1153",
       "mask": 32,
       "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
-      "date_created": "2025-01-23T10:15:00Z"
+      "ip": "203.0.113.50",
+      "friendly_name": null,
+      "date_created": "2026-01-23T11:37:36Z",
+      "date_updated": "2026-01-23T11:37:36Z"
     }
   }
 }
 ```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | String | Unique whitelisted IP identifier |
+| ip | String | Whitelisted IPv4 address |
+| mask | Integer | Subnet mask (32 = single IP) |
+| trunk_sid | String | Associated trunk identifier |
+| friendly_name | String | Optional friendly name (`null` if not set) |
+| date_created | String | ISO 8601 timestamp |
+| date_updated | String | ISO 8601 timestamp |
 
 ### Error Response (400 Bad Request - Invalid IP)
 
@@ -417,13 +477,15 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
   "http_code": 200,
   "response": [
     {
-      "status": "success",
       "code": 200,
+      "error_data": null,
+      "status": "success",
       "data": {
         "id": "du_203011350_5061_001",
         "destination": "sip:203.0.113.50:5061;transport=tls",
         "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
-        "date_created": "2025-01-23T10:20:00Z"
+        "date_created": "2026-01-23T10:20:00Z",
+        "date_updated": "2026-01-23T10:20:00Z"
       }
     }
   ]
@@ -455,8 +517,9 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
   "method": "GET",
   "http_code": 200,
   "response": {
-    "status": "success",
     "code": 200,
+    "error_data": null,
+    "status": "success",
     "data": {
       "username": "trmum1a2b3c4d5e6f7890123456",
       "password": "Xk9mP2nQ4rS6tU8v"
@@ -499,22 +562,25 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
   "method": "GET",
   "http_code": 200,
   "response": {
-    "status": "success",
     "code": 200,
+    "error_data": null,
+    "status": "success",
     "data": [
       {
-        "id": "pn_9876543210_001",
+        "id": "41512",
         "phone_number": "+919876543210",
-        "mode": "pstn",
         "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
-        "date_created": "2025-01-23T10:05:00Z"
+        "date_created": "2026-01-23T10:05:00Z",
+        "date_updated": "2026-01-23T10:05:00Z",
+        "mode": null
       },
       {
-        "id": "pn_9876543211_002",
+        "id": "41513",
         "phone_number": "+919876543211",
-        "mode": "flow",
         "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
-        "date_created": "2025-01-23T10:06:00Z"
+        "date_created": "2026-01-23T10:06:00Z",
+        "date_updated": "2026-01-23T10:06:00Z",
+        "mode": "flow"
       }
     ]
   }
@@ -546,15 +612,18 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
   "method": "GET",
   "http_code": 200,
   "response": {
-    "status": "success",
     "code": 200,
+    "error_data": null,
+    "status": "success",
     "data": [
       {
-        "id": "wl_203011350_001",
-        "ip": "203.0.113.50",
+        "id": "1153",
         "mask": 32,
         "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
-        "date_created": "2025-01-23T10:15:00Z"
+        "ip": "203.0.113.50",
+        "friendly_name": null,
+        "date_created": "2026-01-23T10:15:00Z",
+        "date_updated": "2026-01-23T10:15:00Z"
       }
     ]
   }
@@ -586,14 +655,16 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
   "method": "GET",
   "http_code": 200,
   "response": {
-    "status": "success",
     "code": 200,
+    "error_data": null,
+    "status": "success",
     "data": [
       {
         "id": "du_203011350_5061_001",
         "destination": "sip:203.0.113.50:5061;transport=tls",
         "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
-        "date_created": "2025-01-23T10:20:00Z"
+        "date_created": "2026-01-23T10:20:00Z",
+        "date_updated": "2026-01-23T10:20:00Z"
       }
     ]
   }
@@ -640,13 +711,15 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
   "http_code": 200,
   "response": [
     {
-      "status": "success",
       "code": 200,
+      "error_data": null,
+      "status": "success",
       "data": {
         "name": "trunk_external_alias",
         "value": "+919876543210",
         "trunk_sid": "trmum1a2b3c4d5e6f7890123456",
-        "date_created": "2025-01-23T10:25:00Z"
+        "date_created": "2026-01-23T10:25:00Z",
+        "date_updated": "2026-01-23T10:25:00Z"
       }
     }
   ]
@@ -678,8 +751,9 @@ curl -X DELETE "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/acc
   "method": "DELETE",
   "http_code": 200,
   "response": {
-    "status": "success",
     "code": 200,
+    "error_data": null,
+    "status": "success",
     "data": null
   }
 }
