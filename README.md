@@ -98,7 +98,7 @@ For connecting your Contact Center to Voice AI bots.
 
 Same as PSTN Step 1.
 
-### Step 2: Map Phone Number (Flow Mode)
+### Step 2: Map Phone Number (Flow Mode)- Procure SIP Exophone from Account or contact support
 
 ```bash
 curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers" \
@@ -119,9 +119,9 @@ Same as PSTN Step 3.
 
 a. Follow https://docs.exotel.com/exotel-agentstream/streamkit-cloud for end-to-end steps
 
-b.Create flow in AppBazaar
+b. Create flow in AppBazaar with Voicebot applet https://my.in.exotel.com/apps
 
-b. Map DID to flow
+b. Map DID to flow through Exophone: https://my.in.exotel.com/numbers
 
 ---
 
