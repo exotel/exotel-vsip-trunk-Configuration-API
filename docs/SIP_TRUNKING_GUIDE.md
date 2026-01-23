@@ -105,7 +105,7 @@ The `mode` parameter in Map Phone Number API determines call routing:
 2. Map Phone Number to Trunk (mode: flow)
 3. Map ACL to Trunk (whitelist your server IP)
 ```
-
+Firewall allows SIP + RTP from Exotel
 ---
 
 ## StreamKit Overview
@@ -129,6 +129,8 @@ StreamKit is a cloud-native SIP-to-WebSocket connector for Voice AI integration.
 - StreamKit: Calls go to Voice AI platform
 
 Learn more: https://exotel.com/products/streamkit-cloud-connector/
+
+https://docs.exotel.com/exotel-agentstream/streamkit-cloud
 
 ---
 
@@ -181,7 +183,7 @@ After completing API setup, configure your PBX:
 | Setting | Value |
 |---------|-------|
 | SIP Server | `<your_account_sid>.pstn.exotel.com` |
-| Port | 5060 (TCP) or 5061 (TLS) |
+| Port | 5070 (TCP) or 443 (TLS) |
 | Username | `trunk_sid` from Create Trunk response |
 | Transport | TCP or TLS |
 
@@ -204,6 +206,14 @@ For detailed API documentation with request/response examples, see [API Referenc
 | Delete Trunk | Remove trunk and all configurations |
 
 ---
+
+##Rule of Thumb
+
+• Outbound (SIP → PSTN): Always whitelist your source IP
+• Inbound (PSTN → SIP):
+  – Using FQDN destination → No whitelist required
+  – Using IP destination → Destination IP must be allowlisted
+• StreamKit: Always whitelist your source IP
 
 ## Support
 
