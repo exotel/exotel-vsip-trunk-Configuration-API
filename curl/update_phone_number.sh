@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Map Phone Number to Trunk
-# MODE: pstn (default) for PSTN calls, flow for StreamKit
+# Update Phone Number Mode
+# Use this to switch between PSTN and Flow mode
 
 # Source environment variables
 if [ -f "../.env" ]; then
@@ -17,21 +17,26 @@ if [ -z "$EXO_AUTH_KEY" ] || [ -z "$EXO_AUTH_TOKEN" ] || [ -z "$EXO_SUBSCRIBIX_D
 fi
 
 if [ -z "$TRUNK_SID" ]; then
-    echo "Error: TRUNK_SID is required. Set it in your .env file after creating a trunk."
+    echo "Error: TRUNK_SID is required."
     exit 1
 fi
 
-if [ -z "$DID_NUMBER" ]; then
-    echo "Error: DID_NUMBER is required. Set it in your .env file."
+if [ -z "$PHONE_NUMBER_ID" ]; then
+    echo "Error: PHONE_NUMBER_ID is required."
     exit 1
 fi
 
-# Default mode is pstn, can be overridden with MODE=flow for StreamKit
+if [ -z "$PHONE_NUMBER" ]; then
+    echo "Error: PHONE_NUMBER is required."
+    exit 1
+fi
+
+# Default mode is pstn, can be overridden with MODE=flow
 MODE=${MODE:-pstn}
 
-curl --location --request POST "https://${EXO_AUTH_KEY}:${EXO_AUTH_TOKEN}@${EXO_SUBSCRIBIX_DOMAIN}/v2/accounts/${EXO_ACCOUNT_SID}/trunks/${TRUNK_SID}/phone-numbers" \
+curl --location --request PUT "https://${EXO_AUTH_KEY}:${EXO_AUTH_TOKEN}@${EXO_SUBSCRIBIX_DOMAIN}/v2/accounts/${EXO_ACCOUNT_SID}/trunks/${TRUNK_SID}/phone-numbers/${PHONE_NUMBER_ID}" \
   --header 'Content-Type: application/json' \
   --data-raw "{
-  \"phone_number\": \"${DID_NUMBER}\",
+  \"phone_number\": \"${PHONE_NUMBER}\",
   \"mode\": \"${MODE}\"
 }"
