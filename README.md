@@ -13,6 +13,9 @@ SignUp: https://my.in.exotel.com/auth/register
 Complete KYC as per compliance: https://docs.exotel.com/business-phone-system/kyc-verification
 
 Exotel Dashboard → API Credentials:https://my.in.exotel.com/apisettings/site#api-credentials
+
+Purchase Exophone: https://my.in.exotel.com/numbers
+
 - **API Key** (username)
 - **API Token** (password)
 - **Account SID**
@@ -196,6 +199,9 @@ curl -X DELETE "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/
 | `pstn` | Routes calls to telephone network (default) |
 | `flow` | Routes calls to Voice AI bot (StreamKit) |
 
+Configure the network and firewall on your SIP system side to receive or send an invite from Exotel
+
+Follow Exotel SIP Network and configuration Guide :https://docs.exotel.com/dynamic-sip-trunking
 ---
 
 ## Resources
