@@ -1,28 +1,40 @@
 #!/usr/bin/env bash
 
-# Add Destination URI API
-# Tells Exotel where to send incoming calls
-# Default: TLS on port 5061 (recommended)
+# ============================================================================
+# ADD DESTINATION URI
+# Configures where incoming calls are routed (your PBX/server)
+# Required for: Inbound/Origination calls
+# ============================================================================
+# IMPORTANT:
+# - For IP addresses: You MUST whitelist the IP first!
+# - For FQDNs (e.g., sip.company.com): No whitelisting required
+# ============================================================================
 
 # Load environment variables
 if [ -f "../.env" ]; then source ../.env; elif [ -f ".env" ]; then source .env; fi
 
-# Validate required variables
-: "${your_api_key:?Error: your_api_key is required}"
-: "${your_api_token:?Error: your_api_token is required}"
-: "${subdomain:?Error: subdomain is required}"
-: "${your_sid:?Error: your_sid is required}"
-: "${trunk_sid:?Error: trunk_sid is required}"
-: "${your_server_ip:?Error: your_server_ip is required}"
+# Required variables
+: "${API_KEY:?Error: API_KEY is required}"
+: "${API_TOKEN:?Error: API_TOKEN is required}"
+: "${ACCOUNT_SID:?Error: ACCOUNT_SID is required}"
+: "${TRUNK_SID:?Error: TRUNK_SID is required}"
+: "${DESTINATION:?Error: DESTINATION is required (IP or FQDN)}"
 
-# Defaults: TLS on port 5061
-transport="${transport:-tls}"
-dest_port="${dest_port:-5061}"
+# Optional: defaults
+SUBDOMAIN="${SUBDOMAIN:-api.in.exotel.com}"
+PORT="${PORT:-5061}"
+TRANSPORT="${TRANSPORT:-tls}"  # tls (recommended) or tcp
 
-curl -X POST "https://${your_api_key}:${your_api_token}@${subdomain}/v2/accounts/${your_sid}/trunks/${trunk_sid}/destination-uris" \
+echo "Adding destination: ${DESTINATION}:${PORT};transport=${TRANSPORT}"
+
+curl -X POST "https://${API_KEY}:${API_TOKEN}@${SUBDOMAIN}/v2/accounts/${ACCOUNT_SID}/trunks/${TRUNK_SID}/destination-uris" \
   -H "Content-Type: application/json" \
   -d "{
     \"destinations\": [
-      { \"destination\": \"${your_server_ip}:${dest_port};transport=${transport}\" }
+      {
+        \"destination\": \"${DESTINATION}:${PORT};transport=${TRANSPORT}\"
+      }
     ]
   }"
+
+echo ""

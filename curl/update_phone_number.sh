@@ -1,42 +1,39 @@
 #!/usr/bin/env bash
 
-# Update Phone Number Mode
-# Use this to switch between PSTN and Flow mode
+# ============================================================================
+# UPDATE PHONE NUMBER MODE
+# Switch between PSTN and Flow (StreamKit) mode
+# ============================================================================
+# MODE OPTIONS:
+#   pstn - Routes calls to telephone network (PSTN)
+#   flow - Routes calls to Voice AI bot (StreamKit)
+# ============================================================================
+# IMPORTANT: The PHONE_NUMBER_ID is the numeric ID returned when you mapped
+# the phone number (e.g., 41523), NOT the phone number itself!
+# ============================================================================
 
-# Source environment variables
-if [ -f "../.env" ]; then
-    source ../.env
-elif [ -f ".env" ]; then
-    source .env
-fi
+# Load environment variables
+if [ -f "../.env" ]; then source ../.env; elif [ -f ".env" ]; then source .env; fi
 
-# Check required environment variables
-if [ -z "$EXO_AUTH_KEY" ] || [ -z "$EXO_AUTH_TOKEN" ] || [ -z "$EXO_SUBSCRIBIX_DOMAIN" ] || [ -z "$EXO_ACCOUNT_SID" ]; then
-    echo "Error: Missing required environment variables. Please check your .env file."
-    exit 1
-fi
+# Required variables
+: "${API_KEY:?Error: API_KEY is required}"
+: "${API_TOKEN:?Error: API_TOKEN is required}"
+: "${ACCOUNT_SID:?Error: ACCOUNT_SID is required}"
+: "${TRUNK_SID:?Error: TRUNK_SID is required}"
+: "${PHONE_NUMBER_ID:?Error: PHONE_NUMBER_ID is required (numeric ID from map response, e.g., 41523)}"
+: "${PHONE_NUMBER:?Error: PHONE_NUMBER is required (E.164 format)}"
+: "${MODE:?Error: MODE is required (pstn or flow)}"
 
-if [ -z "$TRUNK_SID" ]; then
-    echo "Error: TRUNK_SID is required."
-    exit 1
-fi
+# Optional: defaults
+SUBDOMAIN="${SUBDOMAIN:-api.in.exotel.com}"
 
-if [ -z "$PHONE_NUMBER_ID" ]; then
-    echo "Error: PHONE_NUMBER_ID is required."
-    exit 1
-fi
+echo "Updating phone number ${PHONE_NUMBER} to mode: ${MODE}"
 
-if [ -z "$PHONE_NUMBER" ]; then
-    echo "Error: PHONE_NUMBER is required."
-    exit 1
-fi
+curl -X PUT "https://${API_KEY}:${API_TOKEN}@${SUBDOMAIN}/v2/accounts/${ACCOUNT_SID}/trunks/${TRUNK_SID}/phone-numbers/${PHONE_NUMBER_ID}" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"phone_number\": \"${PHONE_NUMBER}\",
+    \"mode\": \"${MODE}\"
+  }"
 
-# Default mode is pstn, can be overridden with MODE=flow
-MODE=${MODE:-pstn}
-
-curl --location --request PUT "https://${EXO_AUTH_KEY}:${EXO_AUTH_TOKEN}@${EXO_SUBSCRIBIX_DOMAIN}/v2/accounts/${EXO_ACCOUNT_SID}/trunks/${TRUNK_SID}/phone-numbers/${PHONE_NUMBER_ID}" \
-  --header 'Content-Type: application/json' \
-  --data-raw "{
-  \"phone_number\": \"${PHONE_NUMBER}\",
-  \"mode\": \"${MODE}\"
-}"
+echo ""

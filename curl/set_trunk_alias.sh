@@ -1,23 +1,34 @@
 #!/usr/bin/env bash
 
-# Set Trunk Alias API
-# Sets an external Caller ID alias for the trunk
+# ============================================================================
+# SET TRUNK ALIAS (CALLER ID)
+# Sets the phone number displayed to called parties on outbound calls
+# ============================================================================
 
 # Load environment variables
 if [ -f "../.env" ]; then source ../.env; elif [ -f ".env" ]; then source .env; fi
 
-# Validate required variables
-: "${your_api_key:?Error: your_api_key is required}"
-: "${your_api_token:?Error: your_api_token is required}"
-: "${subdomain:?Error: subdomain is required}"
-: "${your_sid:?Error: your_sid is required}"
-: "${trunk_sid:?Error: trunk_sid is required}"
-: "${phone_number:?Error: phone_number is required}"
+# Required variables
+: "${API_KEY:?Error: API_KEY is required}"
+: "${API_TOKEN:?Error: API_TOKEN is required}"
+: "${ACCOUNT_SID:?Error: ACCOUNT_SID is required}"
+: "${TRUNK_SID:?Error: TRUNK_SID is required}"
+: "${CALLER_ID:?Error: CALLER_ID is required (E.164 format, e.g., +919876543210)}"
 
-curl -X POST "https://${your_api_key}:${your_api_token}@${subdomain}/v2/accounts/${your_sid}/trunks/${trunk_sid}/settings" \
+# Optional: defaults
+SUBDOMAIN="${SUBDOMAIN:-api.in.exotel.com}"
+
+echo "Setting caller ID alias: ${CALLER_ID}"
+
+curl -X POST "https://${API_KEY}:${API_TOKEN}@${SUBDOMAIN}/v2/accounts/${ACCOUNT_SID}/trunks/${TRUNK_SID}/settings" \
   -H "Content-Type: application/json" \
   -d "{
     \"settings\": [
-      { \"name\": \"trunk_external_alias\", \"value\": \"${phone_number}\" }
+      {
+        \"name\": \"trunk_external_alias\",
+        \"value\": \"${CALLER_ID}\"
+      }
     ]
   }"
+
+echo ""

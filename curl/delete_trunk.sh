@@ -1,25 +1,30 @@
 #!/usr/bin/env bash
 
-# Delete Trunk API
-# ⚠️ PERMANENTLY deletes the trunk and ALL configurations
+# ============================================================================
+# DELETE TRUNK
+# ⚠️ PERMANENTLY deletes the trunk and ALL its configurations
+# This action CANNOT be undone!
+# ============================================================================
 
 # Load environment variables
 if [ -f "../.env" ]; then source ../.env; elif [ -f ".env" ]; then source .env; fi
 
-# Validate required variables
-: "${your_api_key:?Error: your_api_key is required}"
-: "${your_api_token:?Error: your_api_token is required}"
-: "${subdomain:?Error: subdomain is required}"
-: "${your_sid:?Error: your_sid is required}"
-: "${trunk_sid:?Error: trunk_sid is required}"
+# Required variables
+: "${API_KEY:?Error: API_KEY is required}"
+: "${API_TOKEN:?Error: API_TOKEN is required}"
+: "${ACCOUNT_SID:?Error: ACCOUNT_SID is required}"
+: "${TRUNK_SID:?Error: TRUNK_SID is required}"
 
-echo "⚠️  WARNING: This will permanently delete trunk: ${trunk_sid}"
-read -p "Are you sure? (y/N): " confirm
+# Optional: defaults
+SUBDOMAIN="${SUBDOMAIN:-api.in.exotel.com}"
 
-if [[ "$confirm" =~ ^[Yy]$ ]]; then
-  curl -X DELETE "https://${your_api_key}:${your_api_token}@${subdomain}/v2/accounts/${your_sid}/trunks?trunk_sid=${trunk_sid}" \
-    -H "Content-Type: application/json"
+echo "⚠️  WARNING: This will PERMANENTLY delete trunk: ${TRUNK_SID}"
+echo "    All phone numbers, whitelisted IPs, and destination URIs will be removed!"
+read -p "Are you sure? Type 'yes' to confirm: " confirm
+
+if [[ "$confirm" == "yes" ]]; then
+  curl -X DELETE "https://${API_KEY}:${API_TOKEN}@${SUBDOMAIN}/v2/accounts/${ACCOUNT_SID}/trunks?trunk_sid=${TRUNK_SID}"
+  echo ""
 else
   echo "Cancelled."
 fi
- 

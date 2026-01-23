@@ -1,18 +1,22 @@
 #!/usr/bin/env bash
 
-# Get Whitelisted IPs API
-# Retrieves all whitelisted IPs for a trunk
+# ============================================================================
+# GET WHITELISTED IPs
+# Lists all whitelisted IP addresses for the trunk
+# ============================================================================
 
 # Load environment variables
 if [ -f "../.env" ]; then source ../.env; elif [ -f ".env" ]; then source .env; fi
 
-# Validate required variables
-: "${your_api_key:?Error: your_api_key is required}"
-: "${your_api_token:?Error: your_api_token is required}"
-: "${subdomain:?Error: subdomain is required}"
-: "${your_sid:?Error: your_sid is required}"
-: "${trunk_sid:?Error: trunk_sid is required}"
+# Required variables
+: "${API_KEY:?Error: API_KEY is required}"
+: "${API_TOKEN:?Error: API_TOKEN is required}"
+: "${ACCOUNT_SID:?Error: ACCOUNT_SID is required}"
+: "${TRUNK_SID:?Error: TRUNK_SID is required}"
 
-curl -X GET "https://${your_api_key}:${your_api_token}@${subdomain}/v2/accounts/${your_sid}/trunks/${trunk_sid}/whitelisted-ips" \
-  -H "Content-Type: application/json"
- 
+# Optional: defaults
+SUBDOMAIN="${SUBDOMAIN:-api.in.exotel.com}"
+
+curl -X GET "https://${API_KEY}:${API_TOKEN}@${SUBDOMAIN}/v2/accounts/${ACCOUNT_SID}/trunks/${TRUNK_SID}/whitelisted-ips"
+
+echo ""

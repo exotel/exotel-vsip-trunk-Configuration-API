@@ -142,11 +142,13 @@ Learn more: https://exotel.com/products/streamkit-cloud-connector/
 
 | Issue | Cause | Solution |
 |-------|-------|----------|
-| 401 on registration | Wrong credentials | Get credentials via API |
-| 403 on calls | IP not whitelisted | Add IP via Whitelist API |
-| 404 on calls | Invalid number | Use E.164 format |
-| No inbound calls | Missing destination | Add destination URI |
-| One-way audio | Firewall | Open UDP 10000-20000 |
+| 403 on calls | IP not whitelisted | Add IP via Whitelist IP API |
+| 404 on calls | Invalid number | Use E.164 format (+919876543210) |
+| No inbound calls | Missing destination | Add destination URI (whitelist IP first!) |
+| "Destination not whitelisted" | IP not whitelisted | Whitelist IP before adding as destination |
+| One-way audio | Firewall blocking RTP | Open UDP 10000-20000 |
+| HTTP 415 error | Wrong content type | Use `Content-Type: application/json` |
+| Duplicate resource error | Already exists | Use different name/IP or delete existing |
 
 ---
 
@@ -156,11 +158,12 @@ After completing API setup, configure your PBX:
 
 | Setting | Value |
 |---------|-------|
-| SIP Server | `<your_sid>.pstn.exotel.com` |
+| SIP Server | `<your_account_sid>.pstn.exotel.com` |
 | Port | 5060 (TCP) or 5061 (TLS) |
-| Username | `trunk_sid` from Create Trunk |
-| Password | From Get Credentials API |
+| Username | `trunk_sid` from Create Trunk response |
 | Transport | TCP or TLS |
+
+> **Note:** Ensure your server IP is whitelisted before attempting to connect.
 
 ---
 

@@ -623,65 +623,7 @@ This error occurs when you try to add a destination URI for an IP that hasn't be
 
 ---
 
-## 6. Get Credentials
-
-Retrieve SIP authentication credentials for PBX configuration.
-
-**Endpoint:**
-```
-GET /v2/accounts/{account_sid}/trunks/{trunk_sid}/credentials
-```
-
-### Example Request
-
-```bash
-curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/credentials"
-```
-
-### Success Response (200 OK)
-
-```json
-{
-  "request_id": "d0e1f2a3-b4c5-6789-0123-def456789012",
-  "method": "GET",
-  "http_code": 200,
-  "response": {
-    "code": 200,
-    "error_data": null,
-    "status": "success",
-    "data": {
-      "username": "trmum1a2b3c4d5e6f7890123456",
-      "password": "Xk9mP2nQ4rS6tU8v"
-    }
-  }
-}
-```
-
-### Empty Response (No Credentials)
-
-If no credentials have been configured, the response will be an empty array:
-
-```json
-{
-  "request_id": "4b15de3688c64a6184ca3777d5cfa046",
-  "method": "GET",
-  "http_code": 200,
-  "response": []
-}
-```
-
-**Use these credentials in your PBX:**
-
-| PBX Setting | Value |
-|-------------|-------|
-| SIP Server | `exoteltest.pstn.exotel.com` |
-| Port | `5060` (TCP) or `5061` (TLS) |
-| Username | `trmum1a2b3c4d5e6f7890123456` |
-| Password | `Xk9mP2nQ4rS6tU8v` |
-
----
-
-## 7. Get Phone Numbers
+## 6. Get Phone Numbers
 
 List all phone numbers mapped to a trunk.
 
@@ -738,7 +680,7 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
 
 ---
 
-## 8. Get Whitelisted IPs
+## 7. Get Whitelisted IPs
 
 List all whitelisted IPs for a trunk.
 
@@ -787,7 +729,7 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
 
 ---
 
-## 9. Get Destination URIs
+## 8. Get Destination URIs
 
 List all destination URIs for inbound routing.
 
@@ -863,7 +805,7 @@ curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accoun
 
 ---
 
-## 10. Set Trunk Alias
+## 9. Set Trunk Alias
 
 Set an external caller ID for outbound calls.
 
@@ -922,7 +864,7 @@ curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accou
 
 ---
 
-## 11. Delete Trunk
+## 10. Delete Trunk
 
 Permanently delete a trunk and all configurations. This cannot be undone.
 
@@ -1003,81 +945,58 @@ curl -X DELETE "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/acc
 
 ---
 
-# End-to-End Example: Outbound Setup
+# End-to-End Example: PSTN Setup (Outbound + Inbound)
 
-Complete setup for making outbound calls:
+Complete setup for making and receiving PSTN calls:
 
 ```bash
 # Step 1: Create Trunk
-curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks" \
+curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks" \
   -H "Content-Type: application/json" \
-  -d '{"trunk_name": "outbound_trunk", "nso_code": "ANY-ANY", "domain_name": "exoteltest.pstn.exotel.com"}'
-# Response: trunk_sid = "trmum1a2b3c4d5e6f7890123456"
+  -d '{"trunk_name": "my_trunk", "nso_code": "ANY-ANY", "domain_name": "ACCOUNT_SID.pstn.exotel.com"}'
+# Response: Save trunk_sid from response
 
-# Step 2: Map Phone Number
-curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/phone-numbers" \
+# Step 2: Map Phone Number (PSTN mode)
+curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/phone-numbers" \
   -H "Content-Type: application/json" \
-  -d '{"phone_number": "+919876543210", "mode": "pstn"}'
+  -d '{"phone_number": "+919876543210"}'
+# Response: Save 'id' for Update Phone Number API
 
-# Step 3: Whitelist IP
-curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/whitelisted-ips" \
+# Step 3: Whitelist IP (for Outbound/Termination)
+curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/whitelisted-ips" \
   -H "Content-Type: application/json" \
-  -d '{"ip": "203.0.113.50", "mask": 32}'
+  -d '{"ip": "YOUR_SERVER_IP", "mask": 32}'
 
-# Step 4: Get Credentials
-curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum1a2b3c4d5e6f7890123456/credentials"
-# Response: username="trmum1a2b3c4d5e6f7890123456", password="Xk9mP2nQ4rS6tU8v"
+# Step 4: Add Destination URI (for Inbound/Origination)
+# Note: If using IP, whitelist it first (Step 3). FQDNs don't need whitelisting.
+curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/destination-uris" \
+  -H "Content-Type: application/json" \
+  -d '{"destinations": [{"destination": "YOUR_SERVER_IP:5061;transport=tls"}]}'
 ```
 
 ---
 
-# End-to-End Example: Inbound Setup
-
-Complete setup for receiving inbound calls:
-
-```bash
-# Step 1: Create Trunk
-curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks" \
-  -H "Content-Type: application/json" \
-  -d '{"trunk_name": "inbound_trunk", "nso_code": "ANY-ANY", "domain_name": "exoteltest.pstn.exotel.com"}'
-# Response: trunk_sid = "trmum2b3c4d5e6f7890123457"
-
-# Step 2: Map Phone Number
-curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum2b3c4d5e6f7890123457/phone-numbers" \
-  -H "Content-Type: application/json" \
-  -d '{"phone_number": "+911800123456"}'
-
-# Step 3: Add Destination URI
-curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum2b3c4d5e6f7890123457/destination-uris" \
-  -H "Content-Type: application/json" \
-  -d '{"destinations": [{"destination": "203.0.113.50:5061;transport=tls"}]}'
-```
-
----
-
-# End-to-End Example: StreamKit Setup
+# End-to-End Example: StreamKit Setup (Voice AI)
 
 Complete setup for Voice AI bot integration:
 
 ```bash
 # Step 1: Create Trunk
-curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks" \
+curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks" \
   -H "Content-Type: application/json" \
-  -d '{"trunk_name": "streamkit_trunk", "nso_code": "ANY-ANY", "domain_name": "exoteltest.pstn.exotel.com"}'
-# Response: trunk_sid = "trmum3c4d5e6f7890123458"
+  -d '{"trunk_name": "streamkit_trunk", "nso_code": "ANY-ANY", "domain_name": "ACCOUNT_SID.pstn.exotel.com"}'
+# Response: Save trunk_sid from response
 
 # Step 2: Map Phone Number with Flow Mode
-curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum3c4d5e6f7890123458/phone-numbers" \
+curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/phone-numbers" \
   -H "Content-Type: application/json" \
   -d '{"phone_number": "+919876543210", "mode": "flow"}'
+# Response: Save 'id' for Update Phone Number API
 
 # Step 3: Whitelist IP
-curl -X POST "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum3c4d5e6f7890123458/whitelisted-ips" \
+curl -X POST "https://API_KEY:API_TOKEN@api.in.exotel.com/v2/accounts/ACCOUNT_SID/trunks/TRUNK_SID/whitelisted-ips" \
   -H "Content-Type: application/json" \
-  -d '{"ip": "203.0.113.50", "mask": 32}'
-
-# Step 4: Get Credentials
-curl -X GET "https://exoteltest:a1b2c3d4e5f6g7h8i9j0@api.in.exotel.com/v2/accounts/exoteltest/trunks/trmum3c4d5e6f7890123458/credentials"
+  -d '{"ip": "YOUR_SERVER_IP", "mask": 32}'
 ```
 
 ---

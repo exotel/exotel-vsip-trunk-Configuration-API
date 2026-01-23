@@ -1,21 +1,31 @@
 #!/usr/bin/env bash
 
-# Create Trunk API
-# Creates a virtual connection between your system and Exotel's PSTN gateway
+# ============================================================================
+# CREATE TRUNK
+# Creates a new SIP trunk - Required first step for all use cases
+# ============================================================================
 
 # Load environment variables
 if [ -f "../.env" ]; then source ../.env; elif [ -f ".env" ]; then source .env; fi
 
-# Validate required variables
-: "${your_api_key:?Error: your_api_key is required}"
-: "${your_api_token:?Error: your_api_token is required}"
-: "${subdomain:?Error: subdomain is required (e.g., api.in.exotel.com)}"
-: "${your_sid:?Error: your_sid is required}"
+# Required variables
+: "${API_KEY:?Error: API_KEY is required}"
+: "${API_TOKEN:?Error: API_TOKEN is required}"
+: "${ACCOUNT_SID:?Error: ACCOUNT_SID is required}"
 
-curl -X POST "https://${your_api_key}:${your_api_token}@${subdomain}/v2/accounts/${your_sid}/trunks" \
+# Optional: defaults
+SUBDOMAIN="${SUBDOMAIN:-api.in.exotel.com}"
+TRUNK_NAME="${TRUNK_NAME:-my_trunk}"
+
+echo "Creating trunk: ${TRUNK_NAME}"
+
+curl -X POST "https://${API_KEY}:${API_TOKEN}@${SUBDOMAIN}/v2/accounts/${ACCOUNT_SID}/trunks" \
   -H "Content-Type: application/json" \
   -d "{
-    \"trunk_name\": \"${trunk_name:-my_trunk}\",
-    \"nso_code\": \"${nso_code:-ANY-ANY}\",
-    \"domain_name\": \"${your_sid}.pstn.exotel.com\"
+    \"trunk_name\": \"${TRUNK_NAME}\",
+    \"nso_code\": \"ANY-ANY\",
+    \"domain_name\": \"${ACCOUNT_SID}.pstn.exotel.com\"
   }"
+
+echo ""
+echo "✓ Save the trunk_sid from the response for subsequent API calls"

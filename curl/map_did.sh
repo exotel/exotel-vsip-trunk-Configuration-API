@@ -1,37 +1,33 @@
 #!/usr/bin/env bash
 
-# Map Phone Number to Trunk
-# MODE: pstn (default) for PSTN calls, flow for StreamKit
+# ============================================================================
+# MAP PHONE NUMBER (DID) TO TRUNK
+# Associates a phone number with the trunk
+# MODE: pstn (default) for PSTN calls, flow for StreamKit/Voice AI
+# ============================================================================
 
-# Source environment variables
-if [ -f "../.env" ]; then
-    source ../.env
-elif [ -f ".env" ]; then
-    source .env
-fi
+# Load environment variables
+if [ -f "../.env" ]; then source ../.env; elif [ -f ".env" ]; then source .env; fi
 
-# Check required environment variables
-if [ -z "$EXO_AUTH_KEY" ] || [ -z "$EXO_AUTH_TOKEN" ] || [ -z "$EXO_SUBSCRIBIX_DOMAIN" ] || [ -z "$EXO_ACCOUNT_SID" ]; then
-    echo "Error: Missing required environment variables. Please check your .env file."
-    exit 1
-fi
+# Required variables
+: "${API_KEY:?Error: API_KEY is required}"
+: "${API_TOKEN:?Error: API_TOKEN is required}"
+: "${ACCOUNT_SID:?Error: ACCOUNT_SID is required}"
+: "${TRUNK_SID:?Error: TRUNK_SID is required - create trunk first}"
+: "${PHONE_NUMBER:?Error: PHONE_NUMBER is required (E.164 format, e.g., +919876543210)}"
 
-if [ -z "$TRUNK_SID" ]; then
-    echo "Error: TRUNK_SID is required. Set it in your .env file after creating a trunk."
-    exit 1
-fi
+# Optional: defaults
+SUBDOMAIN="${SUBDOMAIN:-api.in.exotel.com}"
+MODE="${MODE:-pstn}"  # pstn (default) or flow (for StreamKit)
 
-if [ -z "$DID_NUMBER" ]; then
-    echo "Error: DID_NUMBER is required. Set it in your .env file."
-    exit 1
-fi
+echo "Mapping phone number: ${PHONE_NUMBER} with mode: ${MODE}"
 
-# Default mode is pstn, can be overridden with MODE=flow for StreamKit
-MODE=${MODE:-pstn}
+curl -X POST "https://${API_KEY}:${API_TOKEN}@${SUBDOMAIN}/v2/accounts/${ACCOUNT_SID}/trunks/${TRUNK_SID}/phone-numbers" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"phone_number\": \"${PHONE_NUMBER}\",
+    \"mode\": \"${MODE}\"
+  }"
 
-curl --location --request POST "https://${EXO_AUTH_KEY}:${EXO_AUTH_TOKEN}@${EXO_SUBSCRIBIX_DOMAIN}/v2/accounts/${EXO_ACCOUNT_SID}/trunks/${TRUNK_SID}/phone-numbers" \
-  --header 'Content-Type: application/json' \
-  --data-raw "{
-  \"phone_number\": \"${DID_NUMBER}\",
-  \"mode\": \"${MODE}\"
-}"
+echo ""
+echo "✓ Save the 'id' from the response - needed for Update Phone Number API"
