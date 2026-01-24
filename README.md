@@ -16,6 +16,10 @@ Exotel Dashboard → API Credentials:https://my.in.exotel.com/apisettings/site#a
 
 Purchase Exophone: https://my.in.exotel.com/numbers
 
+Reference docs: https://docs.exotel.com/dynamic-sip-trunking
+
+https://developer.exotel.com/api/sip-trunking-apis
+
 - **API Key** (username)
 - **API Token** (password)
 - **Account SID**
