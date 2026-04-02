@@ -6,6 +6,6 @@ args=()
 [ -n "$PAGE_OFFSET" ] && args+=("offset=${PAGE_OFFSET}")
 [ -n "$TRUNK_SID" ] && args+=("trunk_sid=${TRUNK_SID}")
 QS=$(IFS='&'; echo "${args[*]}")
-URL="https://${EXO_AUTH_KEY}:${EXO_AUTH_TOKEN}@${EXO_SUBSCRIBIX_DOMAIN}/v2/accounts/${EXO_ACCOUNT_SID}/trunks"
+URL="https://${EXO_AUTH_KEY}:${EXO_AUTH_TOKEN}@${EXO_API_DOMAIN}/v2/accounts/${EXO_ACCOUNT_SID}/trunks"
 [ -n "$QS" ] && URL="${URL}?${QS}"
 curl -sS "$URL"

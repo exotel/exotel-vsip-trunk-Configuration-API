@@ -35,7 +35,7 @@ This collection follows the **[Exotel SIP Trunking APIs](https://www.postman.com
    ```
    EXO_AUTH_KEY = your_actual_api_key
    EXO_AUTH_TOKEN = your_actual_auth_token
-   EXO_SUBSCRIBIX_DOMAIN = api.in.exotel.com
+   EXO_API_DOMAIN = api.in.exotel.com
    EXO_ACCOUNT_SID = your_actual_account_sid
    ```
 
@@ -98,7 +98,7 @@ This collection follows the **[Exotel SIP Trunking APIs](https://www.postman.com
 | **Authentication** |
 | `EXO_AUTH_KEY` | ✅ | API Key | `your_api_key` |
 | `EXO_AUTH_TOKEN` | ✅ | Auth Token | `your_auth_token` |
-| `EXO_SUBSCRIBIX_DOMAIN` | ✅ | API Domain | `api.in.exotel.com` |
+| `EXO_API_DOMAIN` | ✅ | API Domain | `api.in.exotel.com` |
 | `EXO_ACCOUNT_SID` | ✅ | Account SID | `your_account_sid` |
 | **Configuration** |
 | `TRUNK_NAME` | ✅ | Trunk Name | `postman_trunk` |
@@ -183,16 +183,18 @@ Solution: Use unique trunk names, or check if resource already exists
 
 ---
 
-## 🌍 **Multi-Region Support**
+## 🌍 **API host vs dashboard**
 
-### **India**
+Use the API hostname that matches where your Exotel account was created (same credentials as on that dashboard).
+
+### **India** (`https://my.in.exotel.com`)
 ```
-EXO_SUBSCRIBIX_DOMAIN = api.in.exotel.com
-DID_NUMBER = +91XXXXXXXXXX
+EXO_API_DOMAIN = api.in.exotel.com
 ```
 
-### **Singapore**
+### **Global** (`https://my.exotel.com`)
 ```
+<<<<<<< HEAD
 EXO_SUBSCRIBIX_DOMAIN = api.exotel.com
 DID_NUMBER = +65XXXXXXXX
 ```
@@ -202,6 +204,12 @@ DID_NUMBER = +65XXXXXXXX
 EXO_SUBSCRIBIX_DOMAIN = api.exotel.com
 DID_NUMBER = +1XXXXXXXXXX
 ```
+=======
+EXO_API_DOMAIN = api.exotel.com
+```
+
+Use a **DID** from the **Numbers** page on the same dashboard you use for API credentials (E.164 format).
+>>>>>>> 077ff64 (chore: keep only curl, Python, Go, and Postman samples)
 
 ---
 
@@ -240,9 +248,8 @@ DID_NUMBER = +1XXXXXXXXXX
 
 ## 🔗 **Additional Resources**
 
-- **📚 Complete Error Reference**: [TRUNK_ERRORS_README.md](../TRUNK_ERRORS_README.md)
-- **🛠️ Setup Guide**: [SETUP_GUIDE.md](../SETUP_GUIDE.md)
-- **📖 Main Documentation**: [README.md](../README.md)
+- **📚 API reference**: [SIP Trunking APIs](https://developer.exotel.com/api/sip-trunking-apis)
+- **📖 Main documentation**: [README.md](../README.md)
 - **🔑 API Credentials**: [Exotel Dashboard](https://my.in.exotel.com/apisettings/site#api-credentials)
 - **📱 Virtual Numbers**: [Number Management](https://my.in.exotel.com/numbers)
 - **🔄 Call Flows**: [App Configuration](https://my.in.exotel.com/apps#installed-apps)
@@ -263,4 +270,4 @@ DID_NUMBER = +1XXXXXXXXXX
 
 **🎉 Happy Testing with Exotel vSIP APIs!** 
 
-For issues or questions, check the [Complete Error Reference Guide](../TRUNK_ERRORS_README.md) or create an issue on GitHub. 
+For issues or questions, see [developer.exotel.com](https://developer.exotel.com) or contact Exotel support.

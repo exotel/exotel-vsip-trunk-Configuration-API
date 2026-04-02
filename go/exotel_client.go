@@ -15,11 +15,11 @@ import (
 func base() string {
 	authKey := os.Getenv("EXO_AUTH_KEY")
 	authToken := os.Getenv("EXO_AUTH_TOKEN")
-	domain := os.Getenv("EXO_SUBSCRIBIX_DOMAIN")
+	domain := os.Getenv("EXO_API_DOMAIN")
 	accountSid := os.Getenv("EXO_ACCOUNT_SID")
 
 	if authKey == "" || authToken == "" || domain == "" || accountSid == "" {
-		fmt.Println("Error: Missing required environment variables (EXO_AUTH_KEY, EXO_AUTH_TOKEN, EXO_SUBSCRIBIX_DOMAIN, EXO_ACCOUNT_SID)")
+		fmt.Println("Error: Missing required environment variables (EXO_AUTH_KEY, EXO_AUTH_TOKEN, EXO_API_DOMAIN, EXO_ACCOUNT_SID)")
 		os.Exit(1)
 	}
 

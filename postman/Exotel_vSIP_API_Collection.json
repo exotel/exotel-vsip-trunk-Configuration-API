@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Exotel SIP Trunking APIs",
-    "description": "# Exotel SIP Trunking APIs\n\nResources you can **demo and share** with customers and partners. Import the companion **Environment** and set API key, token, domain, and account SID.\n\n## \ud83d\udc4b Introduction\n\nThis collection mirrors the **Exotel SIP Trunking APIs** workspace layout:\n\n- **1. GETTING STARTED (PSTN)** \u2014 Step-by-step PSTN trunk setup (`pstn` DID mode).\n- **2. STREAMKIT (Voice AI)** \u2014 Flow-mode DID, ACL, and SIP **digest credentials** for Voice AI.\n- **3. MANAGE & VIEW** \u2014 GET/PUT/POST/DEL operations to inspect and change existing configuration.\n\n## \ud83d\ude80 Getting started\n\n1. Import **Exotel_vSIP_Environment.json** and select it.\n2. Set `EXO_AUTH_KEY`, `EXO_AUTH_TOKEN`, `EXO_SUBSCRIBIX_DOMAIN`, `EXO_ACCOUNT_SID`.\n3. Run **Step 1: Create Trunk** in either workflow folder; `TRUNK_SID` is saved for later requests.\n4. Use **MANAGE & VIEW** for audits and clean-up (`PHONE_MAPPING_ID`, `WHITELIST_ENTRY_ID`, `DESTINATION_ID`, `CREDENTIAL_ID` from responses or env).\n\n## \u2b50 Best practices\n\n- Do **not** commit real API keys; use Postman **secret** type for tokens.\n- Prefer **environment variables** for all secrets and IDs.\n- **Delete trunk** is destructive \u2014 use a test account when possible.\n\n**Auth:** Collection uses **Basic** auth (`API_KEY` / `API_TOKEN`). The API also accepts **Bearer** where enabled.\n\n**Docs:** [Public-SIP-Trunk-Credentials-APIs.md](../Public-SIP-Trunk-Credentials-APIs.md) for credential semantics.\n",
+    "description": "# Exotel SIP Trunking APIs\n\nResources you can **demo and share** with customers and partners. Import the companion **Environment** and set API key, token, domain, and account SID.\n\n## \ud83d\udc4b Introduction\n\nThis collection mirrors the **Exotel SIP Trunking APIs** workspace layout:\n\n- **1. GETTING STARTED (PSTN)** \u2014 Step-by-step PSTN trunk setup (`pstn` DID mode).\n- **2. STREAMKIT (Voice AI)** \u2014 Flow-mode DID, ACL, and SIP **digest credentials** for Voice AI.\n- **3. MANAGE & VIEW** \u2014 GET/PUT/POST/DEL operations to inspect and change existing configuration.\n\n## \ud83d\ude80 Getting started\n\n1. Import **Exotel_vSIP_Environment.json** and select it.\n2. Set `EXO_AUTH_KEY`, `EXO_AUTH_TOKEN`, `EXO_API_DOMAIN`, `EXO_ACCOUNT_SID`.\n3. Run **Step 1: Create Trunk** in either workflow folder; `TRUNK_SID` is saved for later requests.\n4. Use **MANAGE & VIEW** for audits and clean-up (`PHONE_MAPPING_ID`, `WHITELIST_ENTRY_ID`, `DESTINATION_ID`, `CREDENTIAL_ID` from responses or env).\n\n## \u2b50 Best practices\n\n- Do **not** commit real API keys; use Postman **secret** type for tokens.\n- Prefer **environment variables** for all secrets and IDs.\n- **Delete trunk** is destructive \u2014 use a test account when possible.\n\n**Auth:** Collection uses **Basic** auth (`API_KEY` / `API_TOKEN`). The API also accepts **Bearer** where enabled.\n\n**Docs:** https://developer.exotel.com/api/sip-trunking-apis\n",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -20,10 +20,10 @@
               }
             ],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -67,10 +67,10 @@
               }
             ],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/phone-numbers",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/phone-numbers",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -114,10 +114,10 @@
               }
             ],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/whitelisted-ips",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/whitelisted-ips",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -161,10 +161,10 @@
               }
             ],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/credentials",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/credentials",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -208,10 +208,10 @@
               }
             ],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -261,10 +261,10 @@
               }
             ],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -308,10 +308,10 @@
               }
             ],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/phone-numbers",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/phone-numbers",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -355,10 +355,10 @@
               }
             ],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/whitelisted-ips",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/whitelisted-ips",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -402,10 +402,10 @@
               }
             ],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/credentials",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/credentials",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -449,10 +449,10 @@
               }
             ],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -489,7 +489,7 @@
     },
     {
       "name": "3. MANAGE & VIEW",
-      "description": "CRUD and readbacks: matches the **Manage & View** folder in the Exotel SIP Trunking APIs workspace, plus extra list/update/delete calls where the Subscribix API supports them.",
+      "description": "CRUD and readbacks: matches the **Manage & View** folder in the Exotel SIP Trunking APIs workspace, plus extra list/update/delete calls for trunks, trunk maps, and credentials where applicable.",
       "item": [
         {
           "name": "GET Get Phone Numbers",
@@ -497,10 +497,10 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/phone-numbers",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/phone-numbers",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -533,10 +533,10 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/whitelisted-ips",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/whitelisted-ips",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -569,10 +569,10 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -610,10 +610,10 @@
               }
             ],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/phone-numbers/{{PHONE_MAPPING_ID}}",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/phone-numbers/{{PHONE_MAPPING_ID}}",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -656,10 +656,10 @@
               }
             ],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/settings",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/settings",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -696,10 +696,10 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks?trunk_sid={{TRUNK_SID}}",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks?trunk_sid={{TRUNK_SID}}",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -736,10 +736,10 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks?page_size={{PAGE_SIZE}}&offset={{PAGE_OFFSET}}",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks?page_size={{PAGE_SIZE}}&offset={{PAGE_OFFSET}}",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -780,10 +780,10 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunk-maps?exophone={{DID_NUMBER}}&trunk_sid={{TRUNK_SID}}",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunk-maps?exophone={{DID_NUMBER}}&trunk_sid={{TRUNK_SID}}",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -824,10 +824,10 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/credentials?page_size={{PAGE_SIZE}}&offset={{PAGE_OFFSET}}",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/credentials?page_size={{PAGE_SIZE}}&offset={{PAGE_OFFSET}}",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -875,10 +875,10 @@
               }
             ],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/credentials/{{CREDENTIAL_ID}}",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/credentials/{{CREDENTIAL_ID}}",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -916,10 +916,10 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/credentials?id={{CREDENTIAL_ID}}",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/credentials?id={{CREDENTIAL_ID}}",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -963,10 +963,10 @@
               }
             ],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/whitelisted-ips/{{WHITELIST_ENTRY_ID}}",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/whitelisted-ips/{{WHITELIST_ENTRY_ID}}",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -1004,10 +1004,10 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/whitelisted-ips?id={{WHITELIST_ENTRY_ID}}",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/whitelisted-ips?id={{WHITELIST_ENTRY_ID}}",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -1051,10 +1051,10 @@
               }
             ],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris/{{DESTINATION_ID}}",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris/{{DESTINATION_ID}}",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -1092,10 +1092,10 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris?id={{DESTINATION_ID}}",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris?id={{DESTINATION_ID}}",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -1134,10 +1134,10 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/phone-numbers?id={{PHONE_MAPPING_ID}}",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/phone-numbers?id={{PHONE_MAPPING_ID}}",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -1176,10 +1176,10 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/settings",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/settings",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -1212,10 +1212,10 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/settings?name=trunk_external_alias",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/settings?name=trunk_external_alias",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -1259,10 +1259,10 @@
               }
             ],
             "url": {
-              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}",
+              "raw": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}",
               "protocol": "https",
               "host": [
-                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+                "{{EXO_API_DOMAIN}}"
               ],
               "path": [
                 "v2",
@@ -1316,7 +1316,7 @@
       "script": {
         "type": "text/javascript",
         "exec": [
-          "const required = ['EXO_AUTH_KEY','EXO_AUTH_TOKEN','EXO_SUBSCRIBIX_DOMAIN','EXO_ACCOUNT_SID'];",
+          "const required = ['EXO_AUTH_KEY','EXO_AUTH_TOKEN','EXO_API_DOMAIN','EXO_ACCOUNT_SID'];",
           "const miss = required.filter(k => !pm.environment.get(k));",
           "if (miss.length) console.log('Missing env: ' + miss.join(', '));"
         ]
@@ -1326,7 +1326,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}",
+      "value": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}",
       "type": "string"
     }
   ]

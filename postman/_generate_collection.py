@@ -4,8 +4,9 @@
    Run: python3 _generate_collection.py
 """
 import json
+from pathlib import Path
 
-HOST = "{{EXO_SUBSCRIBIX_DOMAIN}}"
+HOST = "{{EXO_API_DOMAIN}}"
 ACC = "{{EXO_ACCOUNT_SID}}"
 BASE_PATH = ["v2", "accounts", ACC]
 
@@ -440,7 +441,7 @@ manage_items = [
 
 folder_manage = {
     "name": "3. MANAGE & VIEW",
-    "description": "CRUD and readbacks: matches the **Manage & View** folder in the Exotel SIP Trunking APIs workspace, plus extra list/update/delete calls where the Subscribix API supports them.",
+    "description": "CRUD and readbacks: matches the **Manage & View** folder in the Exotel SIP Trunking APIs workspace, plus extra list/update/delete calls for trunks, trunk maps, and credentials where applicable.",
     "item": manage_items,
 }
 
@@ -459,7 +460,7 @@ This collection mirrors the **Exotel SIP Trunking APIs** workspace layout:
 ## 🚀 Getting started
 
 1. Import **Exotel_vSIP_Environment.json** and select it.
-2. Set `EXO_AUTH_KEY`, `EXO_AUTH_TOKEN`, `EXO_SUBSCRIBIX_DOMAIN`, `EXO_ACCOUNT_SID`.
+2. Set `EXO_AUTH_KEY`, `EXO_AUTH_TOKEN`, `EXO_API_DOMAIN`, `EXO_ACCOUNT_SID`.
 3. Run **Step 1: Create Trunk** in either workflow folder; `TRUNK_SID` is saved for later requests.
 4. Use **MANAGE & VIEW** for audits and clean-up (`PHONE_MAPPING_ID`, `WHITELIST_ENTRY_ID`, `DESTINATION_ID`, `CREDENTIAL_ID` from responses or env).
 
@@ -471,7 +472,7 @@ This collection mirrors the **Exotel SIP Trunking APIs** workspace layout:
 
 **Auth:** Collection uses **Basic** auth (`API_KEY` / `API_TOKEN`). The API also accepts **Bearer** where enabled.
 
-**Docs:** [Public-SIP-Trunk-Credentials-APIs.md](../Public-SIP-Trunk-Credentials-APIs.md) for credential semantics.
+**Docs:** https://developer.exotel.com/api/sip-trunking-apis
 """
 
 collection = {
@@ -494,7 +495,7 @@ collection = {
             "script": {
                 "type": "text/javascript",
                 "exec": [
-                    "const required = ['EXO_AUTH_KEY','EXO_AUTH_TOKEN','EXO_SUBSCRIBIX_DOMAIN','EXO_ACCOUNT_SID'];",
+                    "const required = ['EXO_AUTH_KEY','EXO_AUTH_TOKEN','EXO_API_DOMAIN','EXO_ACCOUNT_SID'];",
                     "const miss = required.filter(k => !pm.environment.get(k));",
                     "if (miss.length) console.log('Missing env: ' + miss.join(', '));",
                 ],
@@ -502,11 +503,11 @@ collection = {
         }
     ],
     "variable": [
-        {"key": "baseUrl", "value": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}", "type": "string"}
+        {"key": "baseUrl", "value": "https://{{EXO_API_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}", "type": "string"}
     ],
 }
 
-out = "/Users/saurabh.sharma/Desktop/SIP Trunking API/postman/Exotel_vSIP_API_Collection.json"
-with open(out, "w") as f:
+out = Path(__file__).resolve().parent / "Exotel_vSIP_API_Collection.json"
+with open(out, "w", encoding="utf-8") as f:
     json.dump(collection, f, indent=2)
 print("Wrote", out)

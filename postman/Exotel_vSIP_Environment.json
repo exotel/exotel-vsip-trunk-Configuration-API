@@ -5,28 +5,28 @@
     {
       "key": "EXO_AUTH_KEY",
       "value": "your_exotel_api_key_here",
-      "description": "Your Exotel API Key - Get from https://my.in.exotel.com/apisettings/site#api-credentials",
+      "description": "Your Exotel API Key — India: https://my.in.exotel.com/apisettings/site#api-credentials · Global: https://my.exotel.com/apisettings/site#api-credentials",
       "enabled": true,
       "type": "secret"
     },
     {
       "key": "EXO_AUTH_TOKEN",
       "value": "your_exotel_auth_token_here",
-      "description": "Your Exotel Auth Token - Get from https://my.in.exotel.com/apisettings/site#api-credentials",
+      "description": "Your Exotel Auth Token — same API Credentials page as API Key (India or Global dashboard per account).",
       "enabled": true,
       "type": "secret"
     },
     {
-      "key": "EXO_SUBSCRIBIX_DOMAIN",
+      "key": "EXO_API_DOMAIN",
       "value": "api.in.exotel.com",
-      "description": "Exotel API Domain (India: api.in.exotel.com, Singapore: api.sg.exotel.com, US: api.us.exotel.com)",
+      "description": "API hostname — India accounts (my.in.exotel.com): api.in.exotel.com · Global accounts (my.exotel.com): api.exotel.com",
       "enabled": true,
       "type": "default"
     },
     {
       "key": "EXO_ACCOUNT_SID",
       "value": "your_account_sid_here",
-      "description": "Your Exotel Account SID - Get from https://my.in.exotel.com/apisettings/site#api-credentials",
+      "description": "Your Exotel Account SID — from API Credentials on the dashboard that matches your account (India or Global).",
       "enabled": true,
       "type": "default"
     },

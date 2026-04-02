@@ -8,11 +8,11 @@ import sys
 def get_base_url():
     auth_key = os.environ.get('EXO_AUTH_KEY')
     auth_token = os.environ.get('EXO_AUTH_TOKEN')
-    domain = os.environ.get('EXO_SUBSCRIBIX_DOMAIN')
+    domain = os.environ.get('EXO_API_DOMAIN')
     account_sid = os.environ.get('EXO_ACCOUNT_SID')
     
     if not all([auth_key, auth_token, domain, account_sid]):
-        print("Error: Missing required environment variables (EXO_AUTH_KEY, EXO_AUTH_TOKEN, EXO_SUBSCRIBIX_DOMAIN, EXO_ACCOUNT_SID)")
+        print("Error: Missing required environment variables (EXO_AUTH_KEY, EXO_AUTH_TOKEN, EXO_API_DOMAIN, EXO_ACCOUNT_SID)")
         sys.exit(1)
     
     return f"https://{auth_key}:{auth_token}@{domain}/v2/accounts/{account_sid}"

@@ -1,197 +1,75 @@
 # Exotel SIP Trunking APIs
 
-Connect your PBX, Contact Center, or Voice AI system to the telephone network.
+Sample clients for Exotel **vSIP / SIP trunking** HTTP APIs. Use **`curl/`** (bash), **`python/`**, **`go/`**, or **`postman/`** — pick one workflow and ignore the rest.
+
+Official reference: [SIP Trunking APIs (developer.exotel.com)](https://developer.exotel.com/api/sip-trunking-apis)
 
 ---
 
-## Quick Start
+## Repository layout
 
-### 1. Get Your Credentials
+| Folder | What it is |
+|--------|------------|
+| [`curl/`](curl/) | Bash scripts; PSTN setup, manage/view, SIP digest credentials |
+| [`python/`](python/) | Python 3 samples using shared `_client.py` |
+| [`go/`](go/) | Go samples; `exotel_client.go` plus one `*.go` per operation |
+| [`postman/`](postman/) | Postman collection + environment + import guide |
 
-SignUp: https://my.in.exotel.com/auth/register
-
-Complete KYC as per compliance: https://docs.exotel.com/business-phone-system/kyc-verification
-
-Exotel Dashboard → API Credentials:https://my.in.exotel.com/apisettings/site#api-credentials
-
-Purchase Exophone: https://my.in.exotel.com/numbers
-
-Reference docs: https://docs.exotel.com/dynamic-sip-trunking
-
-https://developer.exotel.com/api/sip-trunking-apis
-
-- **API Key** (username)
-- **API Token** (password)
-- **Account SID**
-
-### 2. Choose Your Use Case
-
-| Use Case | Description | Setup Steps |
-|----------|-------------|-------------|
-| **PSTN (Standard)** | Make & receive calls via telephone network | Create Trunk → Map Phone Number → Map ACL → Map Destination URI |
-| **StreamKit (Voice AI)** | Connect to Voice AI bots | Create Trunk → Map Phone Number (mode: flow) → Map ACL |
-
-For **SIP digest credentials** (Voice AI / Streamkit-style dynamic source IPs), use `POST/GET/PUT/DELETE .../trunks/{trunk_sid}/credentials`. See [Public SIP Trunk Credentials APIs](docs/Public-SIP-Trunk-Credentials-APIs.md).
+Configuration template: copy **`.env.example`** → **`.env`** in the repo root (used by Python, Go, and the newer curl scripts that reference `EXO_*` variables).
 
 ---
 
-## PSTN Setup (Outbound + Inbound)
+## API host vs dashboard
 
-### Step 1: Create Trunk
+| Account | Dashboard | API hostname (`EXO_API_DOMAIN`) |
+|---------|-----------|-----------------------------------|
+| India | [my.in.exotel.com](https://my.in.exotel.com) | `api.in.exotel.com` |
+| Global | [my.exotel.com](https://my.exotel.com) | `api.exotel.com` |
 
-```bash
-curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "trunk_name": "my_trunk",
-    "nso_code": "ANY-ANY",
-    "domain_name": "<your_sid>.pstn.exotel.com"
-  }'
-```
-
-**Save `trunk_sid` from response!**
-
-### Step 2: Map Phone Number to Trunk
-
-```bash
-curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "phone_number": "+919876543210"
-  }'
-```
-
-**Save `id` from response** (needed for Update Mode API).
-
-### Step 3: Map ACL to Trunk (for Outbound/Termination)
-
-```bash
-curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/whitelisted-ips" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "ip": "<your_server_ip>",
-    "mask": 32
-  }'
-```
-
-### Step 4: Map Destination URI to Trunk (for Inbound/Origination)
-
-> **Important:** For IP destinations, map ACL first (Step 3). FQDNs don't need ACL mapping.
-
-```bash
-curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/destination-uris" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "destinations": [
-      {
-        "destination": "<your_server_ip>:5061;transport=tls"
-      }
-    ]
-  }'
-```
-### Step 5: for Inbound SIP 
-
-a. Create a Flow using Connect Applet in App Bazaar: https://my.in.exotel.com/apps
-
-b. Use sip:<TrunkID> in the Dial Whom field
-
-c. Map DID to flow through Exophone: https://my.in.exotel.com/numbers
-
-d. Check inbound call flow by dialling Exophone/phonenumber to your system via Exotel SIP trunking
+Use the API host that matches where the account was created.
 
 ---
 
-## StreamKit Setup (Voice AI)
+## Quick start
 
-For connecting your Contact Center to Voice AI bots.
-
-### Step 1: Create Trunk
-
-Same as PSTN Step 1.
-
-### Step 2: Map Phone Number (Flow Mode)- Procure SIP Exophone from Account or contact support
+### Environment (Python / Go / credential curl scripts)
 
 ```bash
-curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "phone_number": "+919876543210",
-    "mode": "flow"
-  }'
+cp .env.example .env
+# Edit .env: EXO_AUTH_KEY, EXO_AUTH_TOKEN, EXO_ACCOUNT_SID, EXO_API_DOMAIN
 ```
 
-> **Note:** `mode: flow` routes calls to Voice AI bot instead of PSTN.
+### curl
 
-### Step 3: Map ACL to Trunk
+See [`curl/README.md`](curl/README.md). Older PSTN scripts use `curl/env.example.txt` (`API_KEY`, `SUBDOMAIN`, …). Scripts under `curl/` that call SIP credentials / list endpoints expect the **`EXO_*`** variables from the root `.env`.
 
-Same as PSTN Step 3.
+### Python
 
-### Step 4: Build Flow and Map DID
+From the repository root (so `python/` can import `_client.py`):
 
-a. Follow https://docs.exotel.com/exotel-agentstream/streamkit-cloud for end-to-end steps
+```bash
+cd python
+python3 list_trunks.py
+```
 
-b. Create flow in AppBazaar with Voicebot applet and passthru applet: https://my.in.exotel.com/apps
+### Go
 
-b. Map DID to flow through Exophone: https://my.in.exotel.com/numbers
+From the `go/` directory, pass **`exotel_client.go`** together with the script you want:
+
+```bash
+cd go
+go run exotel_client.go list_trunks.go
+```
+
+### Postman
+
+Import `postman/Exotel_vSIP_API_Collection.json` and `postman/Exotel_vSIP_Environment.json`, set environment variables, then run requests. Details: [`postman/POSTMAN_GUIDE.md`](postman/POSTMAN_GUIDE.md).
 
 ---
 
-## Manage & View
+## SIP digest credentials (optional)
 
-### Update Phone Number Mode (pstn ↔ flow)
-
-```bash
-curl -X PUT "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers/<phone_number_id>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "phone_number": "+919876543210",
-    "mode": "flow"
-  }'
-```
-
-> **Note:** `<phone_number_id>` is the numeric ID (e.g., `41523`) from Map Phone Number response, NOT the phone number!
-
-### Set Trunk Alias (Caller ID for Outbound)
-
-```bash
-curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/settings" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "settings": [
-      {
-        "name": "trunk_external_alias",
-        "value": "+919876543210"
-      }
-    ]
-  }'
-```
-
-### SIP digest credentials (optional)
-
-List, create, update, or delete SIP digest credentials for a trunk. Full contract: [Public-SIP-Trunk-Credentials-APIs.md](docs/Public-SIP-Trunk-Credentials-APIs.md).
-
-```bash
-curl -X GET "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/credentials"
-```
-
-### View Configurations
-
-```bash
-# Get phone numbers
-curl -X GET "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/phone-numbers"
-
-# Get ACLs (whitelisted IPs)
-curl -X GET "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/whitelisted-ips"
-
-# Get destination URIs
-curl -X GET "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/destination-uris"
-```
-
-### Delete Trunk
-
-```bash
-curl -X DELETE "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks?trunk_sid=<trunk_sid>"
-```
+For Voice AI / dynamic source IPs, use `POST/GET/PUT/DELETE` on `.../trunks/{trunk_sid}/credentials`. See the **official API docs** linked above.
 
 ---
 
@@ -199,53 +77,14 @@ curl -X DELETE "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/
 
 | Setting | Value |
 |---------|-------|
-| Base URL | `https://<subdomain>` |
-| Subdomain (India) | `api.in.exotel.com` |
-| Subdomain (Singapore) | `api.exotel.com` |
+| Base URL | `https://<EXO_API_DOMAIN>` |
 | Auth | HTTP Basic (`<api_key>:<api_token>`) |
 | Content-Type | `application/json` |
-| Rate Limit | 200 requests/minute |
-
----
-
-## Mode Options
-
-| Mode | Description |
-|------|-------------|
-| `pstn` | Routes calls to telephone network (default) |
-| `flow` | Routes calls to Voice AI bot (StreamKit) |
-
-Configure the network and firewall on your SIP system side to receive or send an invite from Exotel
-
-Follow Exotel SIP Network and configuration Guide :https://docs.exotel.com/dynamic-sip-trunking
----
-
-## Resources
-
-| Resource | Description |
-|----------|-------------|
-| [API Reference](docs/API_REFERENCE.md) | Full request/response details with examples |
-| [SIP Guide](docs/SIP_TRUNKING_GUIDE.md) | Concepts, troubleshooting, PBX config |
-| [Postman (legacy)](postman/Exotel_SIP_Trunking_APIs.json) | Import & test APIs |
-| [Postman v2 collection](postman/Exotel_vSIP_API_Collection.json) | PSTN / Streamkit / Manage folders + environment |
-| [Postman environment](postman/Exotel_vSIP_Environment.json) | Variables for the v2 collection |
-| [Postman guide](postman/POSTMAN_GUIDE.md) | Import and run steps |
-| [Public SIP credentials](docs/Public-SIP-Trunk-Credentials-APIs.md) | Credentials API contract |
-| [curl Scripts](curl/) | Ready-to-use bash scripts |
-
----
-
-## Common Errors
-
-| Error | Cause | Solution |
-|-------|-------|----------|
-| HTTP 415 | Wrong content type | Use `Content-Type: application/json` |
-| "Destination not whitelisted" | IP not in ACL | Map ACL before mapping as destination |
-| Duplicate resource (1008) | Already exists | Use different name/IP or delete existing |
+| Rate limit | 200 requests/minute (typical) |
 
 ---
 
 ## Support
 
-- Documentation: https://developer.exotel.com
-- Email: support@exotel.com
+- **Documentation:** [developer.exotel.com](https://developer.exotel.com)
+- **Email:** support@exotel.com
