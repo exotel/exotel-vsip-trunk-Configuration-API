@@ -77,15 +77,11 @@ This collection follows the **[Exotel SIP Trunking APIs](https://www.postman.com
 - **Required**: `WHITELIST_IP`, `WHITELIST_MASK`
 - **Recommended**: Use your SIP server's public IP
 
-### **4a. Add UDP Destination**
-- **Purpose**: Configures UDP SIP destination
-- **Format**: `IP:PORT` (UDP is default)
-
-### **4b. Add TCP Destination**
+### **4a. Add TCP Destination**
 - **Purpose**: Configures TCP SIP destination
 - **Format**: `IP:PORT;transport=tcp`
 
-### **4c. Add TLS Destination**
+### **4b. Add TLS Destination**
 - **Purpose**: Configures secure TLS SIP destination
 - **Format**: `IP:PORT;transport=tls`
 
@@ -197,13 +193,13 @@ DID_NUMBER = +91XXXXXXXXXX
 
 ### **Singapore**
 ```
-EXO_SUBSCRIBIX_DOMAIN = api.sg.exotel.com
+EXO_SUBSCRIBIX_DOMAIN = api.exotel.com
 DID_NUMBER = +65XXXXXXXX
 ```
 
 ### **United States**
 ```
-EXO_SUBSCRIBIX_DOMAIN = api.us.exotel.com
+EXO_SUBSCRIBIX_DOMAIN = api.exotel.com
 DID_NUMBER = +1XXXXXXXXXX
 ```
 
