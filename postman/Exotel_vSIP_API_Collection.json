@@ -1,0 +1,1333 @@
+{
+  "info": {
+    "name": "Exotel SIP Trunking APIs",
+    "description": "# Exotel SIP Trunking APIs\n\nResources you can **demo and share** with customers and partners. Import the companion **Environment** and set API key, token, domain, and account SID.\n\n## \ud83d\udc4b Introduction\n\nThis collection mirrors the **Exotel SIP Trunking APIs** workspace layout:\n\n- **1. GETTING STARTED (PSTN)** \u2014 Step-by-step PSTN trunk setup (`pstn` DID mode).\n- **2. STREAMKIT (Voice AI)** \u2014 Flow-mode DID, ACL, and SIP **digest credentials** for Voice AI.\n- **3. MANAGE & VIEW** \u2014 GET/PUT/POST/DEL operations to inspect and change existing configuration.\n\n## \ud83d\ude80 Getting started\n\n1. Import **Exotel_vSIP_Environment.json** and select it.\n2. Set `EXO_AUTH_KEY`, `EXO_AUTH_TOKEN`, `EXO_SUBSCRIBIX_DOMAIN`, `EXO_ACCOUNT_SID`.\n3. Run **Step 1: Create Trunk** in either workflow folder; `TRUNK_SID` is saved for later requests.\n4. Use **MANAGE & VIEW** for audits and clean-up (`PHONE_MAPPING_ID`, `WHITELIST_ENTRY_ID`, `DESTINATION_ID`, `CREDENTIAL_ID` from responses or env).\n\n## \u2b50 Best practices\n\n- Do **not** commit real API keys; use Postman **secret** type for tokens.\n- Prefer **environment variables** for all secrets and IDs.\n- **Delete trunk** is destructive \u2014 use a test account when possible.\n\n**Auth:** Collection uses **Basic** auth (`API_KEY` / `API_TOKEN`). The API also accepts **Bearer** where enabled.\n\n**Docs:** [Public-SIP-Trunk-Credentials-APIs.md](../Public-SIP-Trunk-Credentials-APIs.md) for credential semantics.\n",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. GETTING STARTED (PSTN)",
+      "description": "Blueprint workflow for **PSTN / SIP outbound** trunking. Run steps in order. Uses `mode: pstn` for DID mapping.",
+      "item": [
+        {
+          "name": "POST Step 1: Create Trunk",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks"
+              ]
+            },
+            "description": "Creates the vSIP trunk. Saves **`TRUNK_SID`** to the active environment.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trunk_name\": \"{{TRUNK_NAME}}\",\n  \"nso_code\": \"{{NSO_CODE}}\",\n  \"domain_name\": \"{{EXO_ACCOUNT_SID}}.pstn.exotel.com\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"success\", () => pm.expect(j.response.status).to.eql(\"success\"));",
+                  "if (j.response.status === \"success\" && j.response.data) {",
+                  "  pm.environment.set(\"TRUNK_SID\", j.response.data.trunk_sid);",
+                  "  console.log(\"\u2705 TRUNK_SID=\" + j.response.data.trunk_sid);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Step 2: Map Phone Number to Trunk",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/phone-numbers",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "phone-numbers"
+              ]
+            },
+            "description": "Maps your Exophone (E.164) to the trunk in **pstn** mode. Saves **`PHONE_MAPPING_ID`** when returned.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"{{DID_NUMBER}}\",\n  \"mode\": \"pstn\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "if (j.response && j.response.status === \"success\" && j.response.data && j.response.data.id) {",
+                  "  pm.environment.set(\"PHONE_MAPPING_ID\", j.response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Step 3(a): Map ACL to Trunk (Whitelist IP)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/whitelisted-ips",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "whitelisted-ips"
+              ]
+            },
+            "description": "Use **ACL / whitelisted IPs** when your SIP infrastructure has **stable, known egress IPs** (enterprise SBC/PBX).\n\nIf your provider/platform has **dynamic IPs** (cloud Voice AI), also do **Step 3(b)**. Saves **`WHITELIST_ENTRY_ID`** when returned.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ip\": \"{{WHITELIST_IP}}\",\n  \"mask\": {{WHITELIST_MASK}}\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "if (j.response && j.response.status === \"success\" && j.response.data && j.response.data.id) {",
+                  "  pm.environment.set(\"WHITELIST_ENTRY_ID\", j.response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Step 3(b): Create SIP Credentials (Digest Auth)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/credentials",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "credentials"
+              ]
+            },
+            "description": "Use **SIP digest credentials** when source IPs are **dynamic/unknown** (cloud Voice AI / Streamkit-style). This avoids managing IP allowlists.\n\nYou can use **ACL-only**, **credentials-only**, or **both** (best security when IPs are stable). Saves **`CREDENTIAL_ID`**. DELETE uses query `?id=`; PUT uses path `/credentials/{{CREDENTIAL_ID}}`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_name\": \"{{SIP_CRED_USERNAME}}\",\n  \"password\": \"{{SIP_CRED_PASSWORD}}\",\n  \"friendly_name\": \"{{SIP_CRED_FRIENDLY_NAME}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "if (j.response && j.response.data && j.response.data.id) {",
+                  "  pm.environment.set(\"CREDENTIAL_ID\", j.response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Step 4: Map Destination URI to Trunk",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "destination-uris"
+              ]
+            },
+            "description": "Default **UDP** SIP destination (`IP:port`). For TCP use `;transport=tcp`, for TLS use `;transport=tls` on the destination string. Saves **`DESTINATION_ID`**.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"destinations\": [\n    {\n      \"destination\": \"{{TRUNK_DEST_IP}}:{{TRUNK_DEST_PORT}}\"\n    }\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "if (j.response && j.response[0] && j.response[0].status === \"success\" && j.response[0].data) {",
+                  "  pm.environment.set(\"DESTINATION_ID\", j.response[0].data.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. STREAMKIT (Voice AI)",
+      "description": "Workflow for **Voice AI / Streamkit**-style setups: Exophone in **flow** mode, ACL, then **SIP digest credentials** for dynamic source IPs.",
+      "item": [
+        {
+          "name": "POST Step 1: Create Trunk",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks"
+              ]
+            },
+            "description": "Same as PSTN \u2014 creates trunk and saves **`TRUNK_SID`**.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trunk_name\": \"{{TRUNK_NAME}}\",\n  \"nso_code\": \"{{NSO_CODE}}\",\n  \"domain_name\": \"{{EXO_ACCOUNT_SID}}.pstn.exotel.com\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"success\", () => pm.expect(j.response.status).to.eql(\"success\"));",
+                  "if (j.response.status === \"success\" && j.response.data) {",
+                  "  pm.environment.set(\"TRUNK_SID\", j.response.data.trunk_sid);",
+                  "  console.log(\"\u2705 TRUNK_SID=\" + j.response.data.trunk_sid);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Step 2: Map Phone Number (Flow Mode)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/phone-numbers",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "phone-numbers"
+              ]
+            },
+            "description": "Maps the virtual number in **flow** mode (Exotel App / Flow). Saves **`PHONE_MAPPING_ID`** when returned.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"{{DID_NUMBER}}\",\n  \"mode\": \"flow\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "if (j.response && j.response.status === \"success\" && j.response.data && j.response.data.id) {",
+                  "  pm.environment.set(\"PHONE_MAPPING_ID\", j.response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Step 3(a): Map ACL to Trunk",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/whitelisted-ips",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "whitelisted-ips"
+              ]
+            },
+            "description": "Use **ACL / whitelisted IPs** when your SIP infrastructure has **stable, known egress IPs**. If your Voice AI platform has **dynamic IPs**, do **Step 3(b)**.\n\nSaves **`WHITELIST_ENTRY_ID`** when returned.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ip\": \"{{WHITELIST_IP}}\",\n  \"mask\": {{WHITELIST_MASK}}\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "if (j.response && j.response.status === \"success\" && j.response.data && j.response.data.id) {",
+                  "  pm.environment.set(\"WHITELIST_ENTRY_ID\", j.response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Step 3(b): Create SIP Credentials (Digest Auth)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/credentials",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "credentials"
+              ]
+            },
+            "description": "Use **SIP digest credentials** when source IPs are **dynamic/unknown** (common for cloud Voice AI / Streamkit-style). Configure the same values on your Voice AI SIP trunk.\n\nYou can use **ACL-only**, **credentials-only**, or **both**. Saves **`CREDENTIAL_ID`**. **DELETE** credential: query `?id=`; **PUT** update: path `/credentials/{{CREDENTIAL_ID}}`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_name\": \"{{SIP_CRED_USERNAME}}\",\n  \"password\": \"{{SIP_CRED_PASSWORD}}\",\n  \"friendly_name\": \"{{SIP_CRED_FRIENDLY_NAME}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "if (j.response && j.response.data && j.response.data.id) {",
+                  "  pm.environment.set(\"CREDENTIAL_ID\", j.response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Step 4: Map Destination URI to Trunk",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "destination-uris"
+              ]
+            },
+            "description": "Default **UDP** SIP destination (`IP:port`). For TCP use `;transport=tcp`, for TLS use `;transport=tls` on the destination string. Saves **`DESTINATION_ID`**.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"destinations\": [\n    {\n      \"destination\": \"{{TRUNK_DEST_IP}}:{{TRUNK_DEST_PORT}}\"\n    }\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "if (j.response && j.response[0] && j.response[0].status === \"success\" && j.response[0].data) {",
+                  "  pm.environment.set(\"DESTINATION_ID\", j.response[0].data.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. MANAGE & VIEW",
+      "description": "CRUD and readbacks: matches the **Manage & View** folder in the Exotel SIP Trunking APIs workspace, plus extra list/update/delete calls where the Subscribix API supports them.",
+      "item": [
+        {
+          "name": "GET Get Phone Numbers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/phone-numbers",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "phone-numbers"
+              ]
+            },
+            "description": "List DID \u2194 trunk mappings for this trunk."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Get ACLs (Whitelisted IPs)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/whitelisted-ips",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "whitelisted-ips"
+              ]
+            },
+            "description": "List IP whitelist entries."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Get Destination URIs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "destination-uris"
+              ]
+            },
+            "description": "List configured SIP destination URIs."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT Update Phone Number Mode",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/phone-numbers/{{PHONE_MAPPING_ID}}",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "phone-numbers",
+                "{{PHONE_MAPPING_ID}}"
+              ]
+            },
+            "description": "Switch mapping **`mode`** between `pstn` and `flow`. Set env **`PHONE_MODE`** (default `pstn`). Requires **`PHONE_MAPPING_ID`** from a create step.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"{{DID_NUMBER}}\",\n  \"mode\": \"{{PHONE_MODE}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Set Trunk Alias (Caller ID)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/settings",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "settings"
+              ]
+            },
+            "description": "Sets **`trunk_external_alias`** (caller ID / external alias).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"settings\": [\n    {\n      \"name\": \"trunk_external_alias\",\n      \"value\": \"{{EXOPHONE}}\"\n    }\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"response array\", () => pm.expect(j.response).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DEL Delete Trunk",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks?trunk_sid={{TRUNK_SID}}",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks"
+              ],
+              "query": [
+                {
+                  "key": "trunk_sid",
+                  "value": "{{TRUNK_SID}}"
+                }
+              ]
+            },
+            "description": "**Destructive.** Query param **`trunk_sid`** required."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET List Trunks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks?page_size={{PAGE_SIZE}}&offset={{PAGE_OFFSET}}",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks"
+              ],
+              "query": [
+                {
+                  "key": "page_size",
+                  "value": "{{PAGE_SIZE}}"
+                },
+                {
+                  "key": "offset",
+                  "value": "{{PAGE_OFFSET}}"
+                }
+              ]
+            },
+            "description": "Paginated trunk list. Query: `page_size`, `offset`, optional `trunk_sid`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Trunk Map Lookup (Exophone)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunk-maps?exophone={{DID_NUMBER}}&trunk_sid={{TRUNK_SID}}",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunk-maps"
+              ],
+              "query": [
+                {
+                  "key": "exophone",
+                  "value": "{{DID_NUMBER}}"
+                },
+                {
+                  "key": "trunk_sid",
+                  "value": "{{TRUNK_SID}}"
+                }
+              ]
+            },
+            "description": "Resolve which trunk a virtual number maps to. Query **`exophone`** (required)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET List SIP Credentials",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/credentials?page_size={{PAGE_SIZE}}&offset={{PAGE_OFFSET}}",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "credentials"
+              ],
+              "query": [
+                {
+                  "key": "page_size",
+                  "value": "{{PAGE_SIZE}}"
+                },
+                {
+                  "key": "offset",
+                  "value": "{{PAGE_OFFSET}}"
+                }
+              ]
+            },
+            "description": "Optional query: `page_size`, `offset`, or `id` for one row."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT Update SIP Credential",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/credentials/{{CREDENTIAL_ID}}",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "credentials",
+                "{{CREDENTIAL_ID}}"
+              ]
+            },
+            "description": "Path includes credential id. Body may include `user_name`, `password`, `friendly_name`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"friendly_name\": \"{{SIP_CRED_FRIENDLY_NAME}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DEL Delete SIP Credential",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/credentials?id={{CREDENTIAL_ID}}",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "credentials"
+              ],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "{{CREDENTIAL_ID}}"
+                }
+              ]
+            },
+            "description": "**Query `id`** (not path)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT Update Whitelisted IP",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/whitelisted-ips/{{WHITELIST_ENTRY_ID}}",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "whitelisted-ips",
+                "{{WHITELIST_ENTRY_ID}}"
+              ]
+            },
+            "description": "Requires **`WHITELIST_ENTRY_ID`**.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ip\": \"{{WHITELIST_IP}}\",\n  \"mask\": {{WHITELIST_MASK}}\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DEL Delete Whitelisted IP",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/whitelisted-ips?id={{WHITELIST_ENTRY_ID}}",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "whitelisted-ips"
+              ],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "{{WHITELIST_ENTRY_ID}}"
+                }
+              ]
+            },
+            "description": "Query **`id`** = whitelist row id."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT Update Destination URI",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris/{{DESTINATION_ID}}",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "destination-uris",
+                "{{DESTINATION_ID}}"
+              ]
+            },
+            "description": "Adjust priority/weight per API limits. Requires **`DESTINATION_ID`**.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"priority\": 0,\n  \"weight\": 5\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DEL Delete Destination URI",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/destination-uris?id={{DESTINATION_ID}}",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "destination-uris"
+              ],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "{{DESTINATION_ID}}"
+                }
+              ]
+            },
+            "description": "Query **`id`**."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DEL Delete Phone Number Mapping",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/phone-numbers?id={{PHONE_MAPPING_ID}}",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "phone-numbers"
+              ],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "{{PHONE_MAPPING_ID}}"
+                }
+              ]
+            },
+            "description": "Query **`id`**."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET List Trunk Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/settings",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "settings"
+              ]
+            },
+            "description": "Read all settings for the trunk."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DEL Delete Trunk Setting",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}/settings?name=trunk_external_alias",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}",
+                "settings"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "trunk_external_alias"
+                }
+              ]
+            },
+            "description": "Query **`name`** = setting key to remove."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT Update Trunk",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}/trunks/{{TRUNK_SID}}",
+              "protocol": "https",
+              "host": [
+                "{{EXO_SUBSCRIBIX_DOMAIN}}"
+              ],
+              "path": [
+                "v2",
+                "accounts",
+                "{{EXO_ACCOUNT_SID}}",
+                "trunks",
+                "{{TRUNK_SID}}"
+              ]
+            },
+            "description": "Partial trunk update (`trunk_name`, `auth_type`, `nso_code`, etc. per API).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trunk_name\": \"{{TRUNK_NAME}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Has response\", () => pm.expect(j).to.have.property(\"response\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "username",
+        "value": "{{EXO_AUTH_KEY}}",
+        "type": "string"
+      },
+      {
+        "key": "password",
+        "value": "{{EXO_AUTH_TOKEN}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const required = ['EXO_AUTH_KEY','EXO_AUTH_TOKEN','EXO_SUBSCRIBIX_DOMAIN','EXO_ACCOUNT_SID'];",
+          "const miss = required.filter(k => !pm.environment.get(k));",
+          "if (miss.length) console.log('Missing env: ' + miss.join(', '));"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://{{EXO_SUBSCRIBIX_DOMAIN}}/v2/accounts/{{EXO_ACCOUNT_SID}}",
+      "type": "string"
+    }
+  ]
+}

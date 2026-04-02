@@ -31,6 +31,8 @@ https://developer.exotel.com/api/sip-trunking-apis
 | **PSTN (Standard)** | Make & receive calls via telephone network | Create Trunk → Map Phone Number → Map ACL → Map Destination URI |
 | **StreamKit (Voice AI)** | Connect to Voice AI bots | Create Trunk → Map Phone Number (mode: flow) → Map ACL |
 
+For **SIP digest credentials** (Voice AI / Streamkit-style dynamic source IPs), use `POST/GET/PUT/DELETE .../trunks/{trunk_sid}/credentials`. See [Public SIP Trunk Credentials APIs](docs/Public-SIP-Trunk-Credentials-APIs.md).
+
 ---
 
 ## PSTN Setup (Outbound + Inbound)
@@ -164,6 +166,14 @@ curl -X POST "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<y
   }'
 ```
 
+### SIP digest credentials (optional)
+
+List, create, update, or delete SIP digest credentials for a trunk. Full contract: [Public-SIP-Trunk-Credentials-APIs.md](docs/Public-SIP-Trunk-Credentials-APIs.md).
+
+```bash
+curl -X GET "https://<your_api_key>:<your_api_token>@<subdomain>/v2/accounts/<your_sid>/trunks/<trunk_sid>/credentials"
+```
+
 ### View Configurations
 
 ```bash
@@ -216,7 +226,11 @@ Follow Exotel SIP Network and configuration Guide :https://docs.exotel.com/dynam
 |----------|-------------|
 | [API Reference](docs/API_REFERENCE.md) | Full request/response details with examples |
 | [SIP Guide](docs/SIP_TRUNKING_GUIDE.md) | Concepts, troubleshooting, PBX config |
-| [Postman Collection](postman/Exotel_SIP_Trunking_APIs.json) | Import & test APIs |
+| [Postman (legacy)](postman/Exotel_SIP_Trunking_APIs.json) | Import & test APIs |
+| [Postman v2 collection](postman/Exotel_vSIP_API_Collection.json) | PSTN / Streamkit / Manage folders + environment |
+| [Postman environment](postman/Exotel_vSIP_Environment.json) | Variables for the v2 collection |
+| [Postman guide](postman/POSTMAN_GUIDE.md) | Import and run steps |
+| [Public SIP credentials](docs/Public-SIP-Trunk-Credentials-APIs.md) | Credentials API contract |
 | [curl Scripts](curl/) | Ready-to-use bash scripts |
 
 ---
