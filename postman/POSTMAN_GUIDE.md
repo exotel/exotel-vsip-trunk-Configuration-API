@@ -39,7 +39,7 @@ This collection follows the **[Exotel SIP Trunking APIs](https://www.postman.com
    EXO_ACCOUNT_SID = your_actual_account_sid
    ```
 
-3. **Get Credentials**: Visit [Exotel API Settings](https://my.in.exotel.com/apisettings/site#api-credentials)
+3. **Get Exotel Credentials**: Visit [Exotel API Settings](https://my.in.exotel.com/apisettings/site#api-credentials)
 
 4. **Optional Configuration**:
    ```
